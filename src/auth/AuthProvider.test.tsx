@@ -160,7 +160,7 @@ test('clears private cached data when the session changes', async () => {
     const privateKey = getListWorkspacesQueryKey();
 
     queryClient.setQueryData(privateKey, {
-        data: [{ id: 1 }],
+        data: [{ id: 1, title: 'Road to GM', status: 'active', role: 'owner' }],
     });
 
     act(() => {
