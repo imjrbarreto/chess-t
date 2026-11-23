@@ -178,7 +178,10 @@ test('displays statistics for all data and lists up to five accessible workspace
     expect(await screen.findByText('Bienvenido, Test User'))
         .toBeInTheDocument();
 
-    expect(screen.getByText('Workspaces').parentElement)
+    expect(
+        within(screen.getByRole('main'))
+            .getByText('Workspaces').parentElement
+    )
         .toHaveTextContent('6');
 
     expect(screen.getByText('Workspaces activos').parentElement)
@@ -203,7 +206,10 @@ test('displays zero statistics when no data exists', async () => {
 
     await screen.findByText('Bienvenido, Test User');
 
-    expect(screen.getByText('Workspaces').parentElement)
+    expect(
+        within(screen.getByRole('main'))
+            .getByText('Workspaces').parentElement
+    )
         .toHaveTextContent('0');
 
     expect(screen.getByText('Workspaces activos').parentElement)
