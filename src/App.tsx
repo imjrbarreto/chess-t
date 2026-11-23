@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router';
 import { ProtectedRoute } from './auth/ProtectedRoute';
+import { AppLayout } from './layouts/AppLayout';
 import { AuthLayout } from './layouts/AuthLayout';
 import { DashboardPage } from './pages/DashboardPage';
 import { LoginPage } from './pages/LoginPage';
@@ -16,7 +17,9 @@ function App() {
             </Route>
 
             <Route element={<ProtectedRoute />}>
-                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route element={<AppLayout />}>
+                    <Route path="/dashboard" element={<DashboardPage />} />
+                </Route>
             </Route>
         </Routes>
     );
