@@ -1,4 +1,5 @@
 import { useHealthCheck } from './api/generated/health/health';
+import { Alert } from './components/ui/Alert';
 import { Badge } from './components/ui/Badge';
 import { Button } from './components/ui/Button';
 import { Card } from './components/ui/Card';
@@ -21,6 +22,16 @@ function App() {
             {isError && <p>Error de conexión.</p>}
             {isSuccess && <p>API conectada correctamente ✅</p>}
         
+
+            <div className="mx-auto flex max-w-lg flex-col gap-4 p-8">
+                <Alert>Completa los datos de tu perfil.</Alert>
+
+                <Alert variant="success">Workspace creado correctamente.</Alert>
+
+                <Alert variant="warning">Tienes cambios sin guardar.</Alert>
+
+                <Alert variant="destructive">Las credenciales son incorrectas.</Alert>
+            </div>
 
             <div className="flex flex-wrap gap-3 p-8">
                 <Badge variant="primary">Owner</Badge>
