@@ -1,37 +1,24 @@
-import { render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter, Routes, Route } from 'react-router';
+import { screen } from '@testing-library/react';
+import { Routes, Route } from 'react-router';
 import { afterEach, expect, test } from 'vitest';
-import { AuthProvider } from '../auth/AuthProvider';
 import { setAccessToken } from '../auth/session';
 import { RegisterPage } from './RegisterPage';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw/http';
 import { server } from '../test/mocks/server';
+import { renderWithProviders } from '../test/renderWithProviders';
 
 afterEach(() => {
     setAccessToken(null);
 });
 
 function renderRegisterPage() {
-    const queryClient = new QueryClient({
-        defaultOptions: {
-            queries: { retry: false },
-            mutations: { retry: false },
-        },
-    });
-
-    return render(
-        <QueryClientProvider client={queryClient}>
-            <MemoryRouter initialEntries={['/register']}>
-                <AuthProvider>
-                    <Routes>
-                        <Route path="/register" element={<RegisterPage />} />
-                        <Route path="/dashboard" element={<h1>Dashboard</h1>} />
-                    </Routes>
-                </AuthProvider>
-            </MemoryRouter>
-        </QueryClientProvider>
+    return renderWithProviders(
+        <Routes>
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/dashboard" element={<h1>Dashboard</h1>} />
+        </Routes>,
+        '/register',
     );
 }
 

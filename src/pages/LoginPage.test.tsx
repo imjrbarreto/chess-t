@@ -1,13 +1,12 @@
-import { render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter, Routes, Route } from 'react-router';
+import { screen } from '@testing-library/react';
+import { Routes, Route } from 'react-router';
 import { afterEach, expect, test } from 'vitest';
-import { AuthProvider } from '../auth/AuthProvider';
 import { LoginPage } from './LoginPage';
 import userEvent from '@testing-library/user-event';
 import { server } from '../test/mocks/server';
 import { http, HttpResponse } from 'msw/http';
 import { setAccessToken } from '../auth/session';
+import { renderWithProviders } from '../test/renderWithProviders';
 
 
 afterEach(() => {
@@ -15,27 +14,12 @@ afterEach(() => {
 });
 
 function renderLoginPage() {
-    const queryClient = new QueryClient({
-        defaultOptions: {
-            queries: { retry: false },
-            mutations: { retry: false },
-        },
-    });
-
-    return render(
-        <QueryClientProvider client={queryClient}>
-            <MemoryRouter initialEntries={['/login']}>
-                <AuthProvider>
-                    <Routes>
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route
-                            path="/dashboard"
-                            element={<h1>Dashboard</h1>}
-                        />
-                    </Routes>
-                </AuthProvider>
-            </MemoryRouter>
-        </QueryClientProvider>
+    return renderWithProviders(
+        <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/dashboard" element={<h1>Dashboard</h1>} />
+        </Routes>,
+        '/login',
     );
 }
 
