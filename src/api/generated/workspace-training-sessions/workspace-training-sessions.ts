@@ -24,13 +24,6 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
-import * as axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
 import type {
   ForbiddenResponse,
   LinkTrainingSessionInput,
@@ -40,7 +33,10 @@ import type {
   ValidationFailedResponse
 } from '../models';
 
+import { customInstance } from '../../axios';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
@@ -64,27 +60,16 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
  * @summary List the training sessions linked to a workspace
  */
 export const listWorkspaceTrainingSessions = (
-    workspace: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<TrainingSessionList>> => {
+    workspace: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.get(
-      `/workspaces/${workspace}/training-sessions`,options
-    );
-  }
-
-export const getListWorkspaceTrainingSessionsUrl = (workspace: number,) => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/workspaces/${workspace}/training-sessions`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<TrainingSessionList>(
+      {url: `/workspaces/${workspace}/training-sessions`, method: 'GET', signal
+    },
+      options);
+    }
 
 
 
@@ -96,16 +81,16 @@ export const getListWorkspaceTrainingSessionsQueryKey = (workspace: number,) => 
     }
 
 
-export const getListWorkspaceTrainingSessionsQueryOptions = <TData = Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getListWorkspaceTrainingSessionsQueryOptions = <TData = Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getListWorkspaceTrainingSessionsQueryKey(workspace);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>> = ({ signal }) => listWorkspaceTrainingSessions(workspace, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>> = ({ signal }) => listWorkspaceTrainingSessions(workspace, requestOptions, signal);
 
 
 
@@ -115,51 +100,51 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type ListWorkspaceTrainingSessionsQueryResult = NonNullable<Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>>
-export type ListWorkspaceTrainingSessionsQueryError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListWorkspaceTrainingSessionsQueryError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse
 
 
 /**
  * Available to any member of the workspace. Returns an empty list if no sessions are linked.
  * @summary List the training sessions linked to a workspace
  */
-export function useListWorkspaceTrainingSessions<TData = Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListWorkspaceTrainingSessions<TData = Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  workspace: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>,
           TError,
           Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * Available to any member of the workspace. Returns an empty list if no sessions are linked.
  * @summary List the training sessions linked to a workspace
  */
-export function useListWorkspaceTrainingSessions<TData = Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListWorkspaceTrainingSessions<TData = Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>,
           TError,
           Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * Available to any member of the workspace. Returns an empty list if no sessions are linked.
  * @summary List the training sessions linked to a workspace
  */
-export function useListWorkspaceTrainingSessions<TData = Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
- workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useListWorkspaceTrainingSessions<TData = Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
+ workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * Available to any member of the workspace. Returns an empty list if no sessions are linked.
  * @summary List the training sessions linked to a workspace
  */
-export function useListWorkspaceTrainingSessions<TData = Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
- workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useListWorkspaceTrainingSessions<TData = Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
+ workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaceTrainingSessions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -181,44 +166,34 @@ export function useListWorkspaceTrainingSessions<TData = Awaited<ReturnType<type
  */
 export const linkTrainingSession = (
     workspace: number,
-    linkTrainingSessionInput: LinkTrainingSessionInput, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
+    linkTrainingSessionInput: LinkTrainingSessionInput,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.post(
-      `/workspaces/${workspace}/training-sessions`,
-      linkTrainingSessionInput,options
-    );
-  }
-
-export const getLinkTrainingSessionUrl = (workspace: number,) => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/workspaces/${workspace}/training-sessions`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<void>(
+      {url: `/workspaces/${workspace}/training-sessions`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: linkTrainingSessionInput, signal
+    },
+      options);
+    }
 
 
 
 
 export const getLinkTrainingSessionMutationKey = () => ['linkTrainingSession'] as const;
 
-export const getLinkTrainingSessionMutationOptions = <TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkTrainingSession>>, TError,LinkTrainingSessionMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const getLinkTrainingSessionMutationOptions = <TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkTrainingSession>>, TError,LinkTrainingSessionMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof linkTrainingSession>>, TError,LinkTrainingSessionMutationVariables, TContext> => {
 
 const mutationKey = getLinkTrainingSessionMutationKey();
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -226,7 +201,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof linkTrainingSession>>, LinkTrainingSessionMutationVariables> = (props) => {
           const {workspace,data} = props ?? {};
 
-          return  linkTrainingSession(workspace,data,axiosOptions)
+          return  linkTrainingSession(workspace,data,requestOptions)
         }
 
 
@@ -238,15 +213,15 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type LinkTrainingSessionMutationResult = NonNullable<Awaited<ReturnType<typeof linkTrainingSession>>>
     export type LinkTrainingSessionMutationBody = LinkTrainingSessionInput
-    export type LinkTrainingSessionMutationError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse>
+    export type LinkTrainingSessionMutationError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse
     export type LinkTrainingSessionMutationVariables = {workspace: number;data: LinkTrainingSessionInput}
 
     /**
  * Only the owner or a coach of the workspace can link a session, and only one they created. Linking the same session again does not create duplicates.
  * @summary Link an existing training session to a workspace
  */
-export const useLinkTrainingSession = <TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkTrainingSession>>, TError,LinkTrainingSessionMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const useLinkTrainingSession = <TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof linkTrainingSession>>, TError,LinkTrainingSessionMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof linkTrainingSession>>,
         TError,
@@ -261,44 +236,32 @@ export const useLinkTrainingSession = <TError = AxiosError<UnauthenticatedRespon
  */
 export const unlinkTrainingSession = (
     workspace: number,
-    trainingSession: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
+    trainingSession: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.delete(
-      `/workspaces/${workspace}/training-sessions/${trainingSession}`,options
-    );
-  }
-
-export const getUnlinkTrainingSessionUrl = (workspace: number,
-    trainingSession: number,) => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/workspaces/${workspace}/training-sessions/${trainingSession}`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<void>(
+      {url: `/workspaces/${workspace}/training-sessions/${trainingSession}`, method: 'DELETE', signal
+    },
+      options);
+    }
 
 
 
 
 export const getUnlinkTrainingSessionMutationKey = () => ['unlinkTrainingSession'] as const;
 
-export const getUnlinkTrainingSessionMutationOptions = <TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlinkTrainingSession>>, TError,UnlinkTrainingSessionMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const getUnlinkTrainingSessionMutationOptions = <TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlinkTrainingSession>>, TError,UnlinkTrainingSessionMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof unlinkTrainingSession>>, TError,UnlinkTrainingSessionMutationVariables, TContext> => {
 
 const mutationKey = getUnlinkTrainingSessionMutationKey();
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -306,7 +269,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof unlinkTrainingSession>>, UnlinkTrainingSessionMutationVariables> = (props) => {
           const {workspace,trainingSession} = props ?? {};
 
-          return  unlinkTrainingSession(workspace,trainingSession,axiosOptions)
+          return  unlinkTrainingSession(workspace,trainingSession,requestOptions)
         }
 
 
@@ -318,15 +281,15 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type UnlinkTrainingSessionMutationResult = NonNullable<Awaited<ReturnType<typeof unlinkTrainingSession>>>
 
-    export type UnlinkTrainingSessionMutationError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>
+    export type UnlinkTrainingSessionMutationError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse
     export type UnlinkTrainingSessionMutationVariables = {workspace: number;trainingSession: number}
 
     /**
  * The owner can unlink any session; a coach can unlink only the sessions they created. Only the link is removed: the session itself and its links to other workspaces are kept.
  * @summary Unlink a training session from a workspace
  */
-export const useUnlinkTrainingSession = <TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlinkTrainingSession>>, TError,UnlinkTrainingSessionMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const useUnlinkTrainingSession = <TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlinkTrainingSession>>, TError,UnlinkTrainingSessionMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof unlinkTrainingSession>>,
         TError,
@@ -341,30 +304,17 @@ export const useUnlinkTrainingSession = <TError = AxiosError<UnauthenticatedResp
  */
 export const exportTrainingSession = (
     workspace: number,
-    trainingSession: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<Blob>> => {
+    trainingSession: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.get(
-      `/workspaces/${workspace}/training-sessions/${trainingSession}/export`,{
-        responseType: 'blob',
-    ...options,}
-    );
-  }
-
-export const getExportTrainingSessionUrl = (workspace: number,
-    trainingSession: number,) => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/workspaces/${workspace}/training-sessions/${trainingSession}/export`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<Blob>(
+      {url: `/workspaces/${workspace}/training-sessions/${trainingSession}/export`, method: 'GET',
+        responseType: 'blob', signal
+    },
+      options);
+    }
 
 
 
@@ -377,17 +327,17 @@ export const getExportTrainingSessionQueryKey = (workspace: number,
     }
 
 
-export const getExportTrainingSessionQueryOptions = <TData = Awaited<ReturnType<typeof exportTrainingSession>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(workspace: number,
-    trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportTrainingSession>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getExportTrainingSessionQueryOptions = <TData = Awaited<ReturnType<typeof exportTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(workspace: number,
+    trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportTrainingSession>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getExportTrainingSessionQueryKey(workspace,trainingSession);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof exportTrainingSession>>> = ({ signal }) => exportTrainingSession(workspace,trainingSession, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof exportTrainingSession>>> = ({ signal }) => exportTrainingSession(workspace,trainingSession, requestOptions, signal);
 
 
 
@@ -397,14 +347,14 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type ExportTrainingSessionQueryResult = NonNullable<Awaited<ReturnType<typeof exportTrainingSession>>>
-export type ExportTrainingSessionQueryError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>
+export type ExportTrainingSessionQueryError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse
 
 
 /**
  * Available to any member of the workspace. The session must be linked to the workspace.
  * @summary Download a linked training session as a PDF
  */
-export function useExportTrainingSession<TData = Awaited<ReturnType<typeof exportTrainingSession>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useExportTrainingSession<TData = Awaited<ReturnType<typeof exportTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  workspace: number,
     trainingSession: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportTrainingSession>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
@@ -412,14 +362,14 @@ export function useExportTrainingSession<TData = Awaited<ReturnType<typeof expor
           TError,
           Awaited<ReturnType<typeof exportTrainingSession>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * Available to any member of the workspace. The session must be linked to the workspace.
  * @summary Download a linked training session as a PDF
  */
-export function useExportTrainingSession<TData = Awaited<ReturnType<typeof exportTrainingSession>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useExportTrainingSession<TData = Awaited<ReturnType<typeof exportTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  workspace: number,
     trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportTrainingSession>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
@@ -427,25 +377,25 @@ export function useExportTrainingSession<TData = Awaited<ReturnType<typeof expor
           TError,
           Awaited<ReturnType<typeof exportTrainingSession>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * Available to any member of the workspace. The session must be linked to the workspace.
  * @summary Download a linked training session as a PDF
  */
-export function useExportTrainingSession<TData = Awaited<ReturnType<typeof exportTrainingSession>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useExportTrainingSession<TData = Awaited<ReturnType<typeof exportTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  workspace: number,
-    trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportTrainingSession>>, TError, TData>>, axios?: AxiosRequestConfig}
+    trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportTrainingSession>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * Available to any member of the workspace. The session must be linked to the workspace.
  * @summary Download a linked training session as a PDF
  */
-export function useExportTrainingSession<TData = Awaited<ReturnType<typeof exportTrainingSession>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useExportTrainingSession<TData = Awaited<ReturnType<typeof exportTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  workspace: number,
-    trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportTrainingSession>>, TError, TData>>, axios?: AxiosRequestConfig}
+    trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof exportTrainingSession>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 

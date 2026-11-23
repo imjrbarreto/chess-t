@@ -24,13 +24,6 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
-import * as axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
 import type {
   ConflictResponse,
   ForbiddenResponse,
@@ -43,7 +36,10 @@ import type {
   ValidationFailedResponse
 } from '../models';
 
+import { customInstance } from '../../axios';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
@@ -66,27 +62,16 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
  * @summary List the user's training sessions
  */
 export const listTrainingSessions = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<TrainingSessionList>> => {
+
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.get(
-      `/training-sessions`,options
-    );
-  }
-
-export const getListTrainingSessionsUrl = () => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/training-sessions`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<TrainingSessionList>(
+      {url: `/training-sessions`, method: 'GET', signal
+    },
+      options);
+    }
 
 
 
@@ -98,16 +83,16 @@ export const getListTrainingSessionsQueryKey = () => {
     }
 
 
-export const getListTrainingSessionsQueryOptions = <TData = Awaited<ReturnType<typeof listTrainingSessions>>, TError = AxiosError<UnauthenticatedResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTrainingSessions>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getListTrainingSessionsQueryOptions = <TData = Awaited<ReturnType<typeof listTrainingSessions>>, TError = UnauthenticatedResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTrainingSessions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getListTrainingSessionsQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listTrainingSessions>>> = ({ signal }) => listTrainingSessions({ signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listTrainingSessions>>> = ({ signal }) => listTrainingSessions(requestOptions, signal);
 
 
 
@@ -117,39 +102,39 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type ListTrainingSessionsQueryResult = NonNullable<Awaited<ReturnType<typeof listTrainingSessions>>>
-export type ListTrainingSessionsQueryError = AxiosError<UnauthenticatedResponse>
+export type ListTrainingSessionsQueryError = UnauthenticatedResponse
 
 
 /** @summary List the user's training sessions */
-export function useListTrainingSessions<TData = Awaited<ReturnType<typeof listTrainingSessions>>, TError = AxiosError<UnauthenticatedResponse>>(
+export function useListTrainingSessions<TData = Awaited<ReturnType<typeof listTrainingSessions>>, TError = UnauthenticatedResponse>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTrainingSessions>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listTrainingSessions>>,
           TError,
           Awaited<ReturnType<typeof listTrainingSessions>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /** @summary List the user's training sessions */
-export function useListTrainingSessions<TData = Awaited<ReturnType<typeof listTrainingSessions>>, TError = AxiosError<UnauthenticatedResponse>>(
+export function useListTrainingSessions<TData = Awaited<ReturnType<typeof listTrainingSessions>>, TError = UnauthenticatedResponse>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTrainingSessions>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listTrainingSessions>>,
           TError,
           Awaited<ReturnType<typeof listTrainingSessions>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /** @summary List the user's training sessions */
-export function useListTrainingSessions<TData = Awaited<ReturnType<typeof listTrainingSessions>>, TError = AxiosError<UnauthenticatedResponse>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTrainingSessions>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useListTrainingSessions<TData = Awaited<ReturnType<typeof listTrainingSessions>>, TError = UnauthenticatedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTrainingSessions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /** @summary List the user's training sessions */
-export function useListTrainingSessions<TData = Awaited<ReturnType<typeof listTrainingSessions>>, TError = AxiosError<UnauthenticatedResponse>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTrainingSessions>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useListTrainingSessions<TData = Awaited<ReturnType<typeof listTrainingSessions>>, TError = UnauthenticatedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTrainingSessions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -169,44 +154,34 @@ export function useListTrainingSessions<TData = Awaited<ReturnType<typeof listTr
  * @summary Create a training session
  */
 export const createTrainingSession = (
-    trainingSessionInput: TrainingSessionInput, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<TrainingSessionResource>> => {
+    trainingSessionInput: TrainingSessionInput,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.post(
-      `/training-sessions`,
-      trainingSessionInput,options
-    );
-  }
-
-export const getCreateTrainingSessionUrl = () => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/training-sessions`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<TrainingSessionResource>(
+      {url: `/training-sessions`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: trainingSessionInput, signal
+    },
+      options);
+    }
 
 
 
 
 export const getCreateTrainingSessionMutationKey = () => ['createTrainingSession'] as const;
 
-export const getCreateTrainingSessionMutationOptions = <TError = AxiosError<UnauthenticatedResponse | ValidationFailedResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTrainingSession>>, TError,CreateTrainingSessionMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const getCreateTrainingSessionMutationOptions = <TError = UnauthenticatedResponse | ValidationFailedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTrainingSession>>, TError,CreateTrainingSessionMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createTrainingSession>>, TError,CreateTrainingSessionMutationVariables, TContext> => {
 
 const mutationKey = getCreateTrainingSessionMutationKey();
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -214,7 +189,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTrainingSession>>, CreateTrainingSessionMutationVariables> = (props) => {
           const {data} = props ?? {};
 
-          return  createTrainingSession(data,axiosOptions)
+          return  createTrainingSession(data,requestOptions)
         }
 
 
@@ -226,12 +201,12 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type CreateTrainingSessionMutationResult = NonNullable<Awaited<ReturnType<typeof createTrainingSession>>>
     export type CreateTrainingSessionMutationBody = TrainingSessionInput
-    export type CreateTrainingSessionMutationError = AxiosError<UnauthenticatedResponse | ValidationFailedResponse>
+    export type CreateTrainingSessionMutationError = UnauthenticatedResponse | ValidationFailedResponse
     export type CreateTrainingSessionMutationVariables = {data: TrainingSessionInput}
 
     /** @summary Create a training session */
-export const useCreateTrainingSession = <TError = AxiosError<UnauthenticatedResponse | ValidationFailedResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTrainingSession>>, TError,CreateTrainingSessionMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const useCreateTrainingSession = <TError = UnauthenticatedResponse | ValidationFailedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTrainingSession>>, TError,CreateTrainingSessionMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createTrainingSession>>,
         TError,
@@ -245,27 +220,16 @@ export const useCreateTrainingSession = <TError = AxiosError<UnauthenticatedResp
  * @summary Get a training session
  */
 export const getTrainingSession = (
-    trainingSession: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<TrainingSessionResource>> => {
+    trainingSession: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.get(
-      `/training-sessions/${trainingSession}`,options
-    );
-  }
-
-export const getGetTrainingSessionUrl = (trainingSession: number,) => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/training-sessions/${trainingSession}`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<TrainingSessionResource>(
+      {url: `/training-sessions/${trainingSession}`, method: 'GET', signal
+    },
+      options);
+    }
 
 
 
@@ -277,16 +241,16 @@ export const getGetTrainingSessionQueryKey = (trainingSession: number,) => {
     }
 
 
-export const getGetTrainingSessionQueryOptions = <TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTrainingSession>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetTrainingSessionQueryOptions = <TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTrainingSession>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetTrainingSessionQueryKey(trainingSession);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTrainingSession>>> = ({ signal }) => getTrainingSession(trainingSession, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTrainingSession>>> = ({ signal }) => getTrainingSession(trainingSession, requestOptions, signal);
 
 
 
@@ -296,51 +260,51 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetTrainingSessionQueryResult = NonNullable<Awaited<ReturnType<typeof getTrainingSession>>>
-export type GetTrainingSessionQueryError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>
+export type GetTrainingSessionQueryError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse
 
 
 /**
  * Only the creator of the session can view it.
  * @summary Get a training session
  */
-export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  trainingSession: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTrainingSession>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTrainingSession>>,
           TError,
           Awaited<ReturnType<typeof getTrainingSession>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * Only the creator of the session can view it.
  * @summary Get a training session
  */
-export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTrainingSession>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTrainingSession>>,
           TError,
           Awaited<ReturnType<typeof getTrainingSession>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * Only the creator of the session can view it.
  * @summary Get a training session
  */
-export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
- trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTrainingSession>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
+ trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTrainingSession>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * Only the creator of the session can view it.
  * @summary Get a training session
  */
-export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
- trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTrainingSession>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
+ trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTrainingSession>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -361,43 +325,32 @@ export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrain
  * @summary Delete a training session
  */
 export const deleteTrainingSession = (
-    trainingSession: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
+    trainingSession: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.delete(
-      `/training-sessions/${trainingSession}`,options
-    );
-  }
-
-export const getDeleteTrainingSessionUrl = (trainingSession: number,) => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/training-sessions/${trainingSession}`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<void>(
+      {url: `/training-sessions/${trainingSession}`, method: 'DELETE', signal
+    },
+      options);
+    }
 
 
 
 
 export const getDeleteTrainingSessionMutationKey = () => ['deleteTrainingSession'] as const;
 
-export const getDeleteTrainingSessionMutationOptions = <TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTrainingSession>>, TError,DeleteTrainingSessionMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const getDeleteTrainingSessionMutationOptions = <TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTrainingSession>>, TError,DeleteTrainingSessionMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteTrainingSession>>, TError,DeleteTrainingSessionMutationVariables, TContext> => {
 
 const mutationKey = getDeleteTrainingSessionMutationKey();
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -405,7 +358,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTrainingSession>>, DeleteTrainingSessionMutationVariables> = (props) => {
           const {trainingSession} = props ?? {};
 
-          return  deleteTrainingSession(trainingSession,axiosOptions)
+          return  deleteTrainingSession(trainingSession,requestOptions)
         }
 
 
@@ -417,15 +370,15 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type DeleteTrainingSessionMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTrainingSession>>>
 
-    export type DeleteTrainingSessionMutationError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>
+    export type DeleteTrainingSessionMutationError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse
     export type DeleteTrainingSessionMutationVariables = {trainingSession: number}
 
     /**
  * Only the creator of the session can delete it. A session that is linked to a workspace or has responses cannot be deleted: unlink it first.
  * @summary Delete a training session
  */
-export const useDeleteTrainingSession = <TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTrainingSession>>, TError,DeleteTrainingSessionMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const useDeleteTrainingSession = <TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTrainingSession>>, TError,DeleteTrainingSessionMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteTrainingSession>>,
         TError,
@@ -440,44 +393,34 @@ export const useDeleteTrainingSession = <TError = AxiosError<UnauthenticatedResp
  */
 export const updateTrainingSession = (
     trainingSession: number,
-    trainingSessionPatch: TrainingSessionPatch, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<TrainingSessionResource>> => {
+    trainingSessionPatch: TrainingSessionPatch,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.patch(
-      `/training-sessions/${trainingSession}`,
-      trainingSessionPatch,options
-    );
-  }
-
-export const getUpdateTrainingSessionUrl = (trainingSession: number,) => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/training-sessions/${trainingSession}`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<TrainingSessionResource>(
+      {url: `/training-sessions/${trainingSession}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: trainingSessionPatch, signal
+    },
+      options);
+    }
 
 
 
 
 export const getUpdateTrainingSessionMutationKey = () => ['updateTrainingSession'] as const;
 
-export const getUpdateTrainingSessionMutationOptions = <TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTrainingSession>>, TError,UpdateTrainingSessionMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const getUpdateTrainingSessionMutationOptions = <TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTrainingSession>>, TError,UpdateTrainingSessionMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateTrainingSession>>, TError,UpdateTrainingSessionMutationVariables, TContext> => {
 
 const mutationKey = getUpdateTrainingSessionMutationKey();
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -485,7 +428,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTrainingSession>>, UpdateTrainingSessionMutationVariables> = (props) => {
           const {trainingSession,data} = props ?? {};
 
-          return  updateTrainingSession(trainingSession,data,axiosOptions)
+          return  updateTrainingSession(trainingSession,data,requestOptions)
         }
 
 
@@ -497,15 +440,15 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type UpdateTrainingSessionMutationResult = NonNullable<Awaited<ReturnType<typeof updateTrainingSession>>>
     export type UpdateTrainingSessionMutationBody = TrainingSessionPatch
-    export type UpdateTrainingSessionMutationError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse>
+    export type UpdateTrainingSessionMutationError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse
     export type UpdateTrainingSessionMutationVariables = {trainingSession: number;data: TrainingSessionPatch}
 
     /**
  * Only the creator of the session can update it.
  * @summary Update a training session
  */
-export const useUpdateTrainingSession = <TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTrainingSession>>, TError,UpdateTrainingSessionMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const useUpdateTrainingSession = <TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTrainingSession>>, TError,UpdateTrainingSessionMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateTrainingSession>>,
         TError,

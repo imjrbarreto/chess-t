@@ -24,13 +24,6 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
-import * as axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
-
 import type {
   ForbiddenResponse,
   NotFoundResponse,
@@ -42,7 +35,10 @@ import type {
   WorkspaceResource
 } from '../models';
 
+import { customInstance } from '../../axios';
 
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
@@ -65,27 +61,16 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
  * @summary List the user's workspaces
  */
 export const listWorkspaces = (
-     options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkspaceList>> => {
+
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.get(
-      `/workspaces`,options
-    );
-  }
-
-export const getListWorkspacesUrl = () => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/workspaces`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<WorkspaceList>(
+      {url: `/workspaces`, method: 'GET', signal
+    },
+      options);
+    }
 
 
 
@@ -97,16 +82,16 @@ export const getListWorkspacesQueryKey = () => {
     }
 
 
-export const getListWorkspacesQueryOptions = <TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = AxiosError<UnauthenticatedResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaces>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getListWorkspacesQueryOptions = <TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = UnauthenticatedResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaces>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getListWorkspacesQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listWorkspaces>>> = ({ signal }) => listWorkspaces({ signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listWorkspaces>>> = ({ signal }) => listWorkspaces(requestOptions, signal);
 
 
 
@@ -116,39 +101,39 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type ListWorkspacesQueryResult = NonNullable<Awaited<ReturnType<typeof listWorkspaces>>>
-export type ListWorkspacesQueryError = AxiosError<UnauthenticatedResponse>
+export type ListWorkspacesQueryError = UnauthenticatedResponse
 
 
 /** @summary List the user's workspaces */
-export function useListWorkspaces<TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = AxiosError<UnauthenticatedResponse>>(
+export function useListWorkspaces<TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = UnauthenticatedResponse>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaces>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listWorkspaces>>,
           TError,
           Awaited<ReturnType<typeof listWorkspaces>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /** @summary List the user's workspaces */
-export function useListWorkspaces<TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = AxiosError<UnauthenticatedResponse>>(
+export function useListWorkspaces<TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = UnauthenticatedResponse>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaces>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listWorkspaces>>,
           TError,
           Awaited<ReturnType<typeof listWorkspaces>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /** @summary List the user's workspaces */
-export function useListWorkspaces<TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = AxiosError<UnauthenticatedResponse>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaces>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useListWorkspaces<TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = UnauthenticatedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaces>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /** @summary List the user's workspaces */
-export function useListWorkspaces<TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = AxiosError<UnauthenticatedResponse>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaces>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useListWorkspaces<TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = UnauthenticatedResponse>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listWorkspaces>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -168,44 +153,34 @@ export function useListWorkspaces<TData = Awaited<ReturnType<typeof listWorkspac
  * @summary Create a workspace
  */
 export const createWorkspace = (
-    workspaceInput: WorkspaceInput, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkspaceResource>> => {
+    workspaceInput: WorkspaceInput,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.post(
-      `/workspaces`,
-      workspaceInput,options
-    );
-  }
-
-export const getCreateWorkspaceUrl = () => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/workspaces`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<WorkspaceResource>(
+      {url: `/workspaces`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: workspaceInput, signal
+    },
+      options);
+    }
 
 
 
 
 export const getCreateWorkspaceMutationKey = () => ['createWorkspace'] as const;
 
-export const getCreateWorkspaceMutationOptions = <TError = AxiosError<UnauthenticatedResponse | ValidationFailedResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWorkspace>>, TError,CreateWorkspaceMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const getCreateWorkspaceMutationOptions = <TError = UnauthenticatedResponse | ValidationFailedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWorkspace>>, TError,CreateWorkspaceMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createWorkspace>>, TError,CreateWorkspaceMutationVariables, TContext> => {
 
 const mutationKey = getCreateWorkspaceMutationKey();
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -213,7 +188,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof createWorkspace>>, CreateWorkspaceMutationVariables> = (props) => {
           const {data} = props ?? {};
 
-          return  createWorkspace(data,axiosOptions)
+          return  createWorkspace(data,requestOptions)
         }
 
 
@@ -225,12 +200,12 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type CreateWorkspaceMutationResult = NonNullable<Awaited<ReturnType<typeof createWorkspace>>>
     export type CreateWorkspaceMutationBody = WorkspaceInput
-    export type CreateWorkspaceMutationError = AxiosError<UnauthenticatedResponse | ValidationFailedResponse>
+    export type CreateWorkspaceMutationError = UnauthenticatedResponse | ValidationFailedResponse
     export type CreateWorkspaceMutationVariables = {data: WorkspaceInput}
 
     /** @summary Create a workspace */
-export const useCreateWorkspace = <TError = AxiosError<UnauthenticatedResponse | ValidationFailedResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWorkspace>>, TError,CreateWorkspaceMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const useCreateWorkspace = <TError = UnauthenticatedResponse | ValidationFailedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWorkspace>>, TError,CreateWorkspaceMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createWorkspace>>,
         TError,
@@ -243,27 +218,16 @@ export const useCreateWorkspace = <TError = AxiosError<UnauthenticatedResponse |
  * @summary Get a workspace
  */
 export const getWorkspace = (
-    workspace: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkspaceResource>> => {
+    workspace: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.get(
-      `/workspaces/${workspace}`,options
-    );
-  }
-
-export const getGetWorkspaceUrl = (workspace: number,) => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/workspaces/${workspace}`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<WorkspaceResource>(
+      {url: `/workspaces/${workspace}`, method: 'GET', signal
+    },
+      options);
+    }
 
 
 
@@ -275,16 +239,16 @@ export const getGetWorkspaceQueryKey = (workspace: number,) => {
     }
 
 
-export const getGetWorkspaceQueryOptions = <TData = Awaited<ReturnType<typeof getWorkspace>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkspace>>, TError, TData>>, axios?: AxiosRequestConfig}
+export const getGetWorkspaceQueryOptions = <TData = Awaited<ReturnType<typeof getWorkspace>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkspace>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-const {query: queryOptions, axios: axiosOptions} = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetWorkspaceQueryKey(workspace);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWorkspace>>> = ({ signal }) => getWorkspace(workspace, { signal, ...axiosOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWorkspace>>> = ({ signal }) => getWorkspace(workspace, requestOptions, signal);
 
 
 
@@ -294,39 +258,39 @@ const {query: queryOptions, axios: axiosOptions} = options ?? {};
 }
 
 export type GetWorkspaceQueryResult = NonNullable<Awaited<ReturnType<typeof getWorkspace>>>
-export type GetWorkspaceQueryError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>
+export type GetWorkspaceQueryError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse
 
 
 /** @summary Get a workspace */
-export function useGetWorkspace<TData = Awaited<ReturnType<typeof getWorkspace>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useGetWorkspace<TData = Awaited<ReturnType<typeof getWorkspace>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  workspace: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkspace>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getWorkspace>>,
           TError,
           Awaited<ReturnType<typeof getWorkspace>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /** @summary Get a workspace */
-export function useGetWorkspace<TData = Awaited<ReturnType<typeof getWorkspace>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useGetWorkspace<TData = Awaited<ReturnType<typeof getWorkspace>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkspace>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getWorkspace>>,
           TError,
           Awaited<ReturnType<typeof getWorkspace>>
         > , 'initialData'
-      >, axios?: AxiosRequestConfig}
+      >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /** @summary Get a workspace */
-export function useGetWorkspace<TData = Awaited<ReturnType<typeof getWorkspace>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
- workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkspace>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetWorkspace<TData = Awaited<ReturnType<typeof getWorkspace>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
+ workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkspace>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /** @summary Get a workspace */
-export function useGetWorkspace<TData = Awaited<ReturnType<typeof getWorkspace>>, TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>>(
- workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkspace>>, TError, TData>>, axios?: AxiosRequestConfig}
+export function useGetWorkspace<TData = Awaited<ReturnType<typeof getWorkspace>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
+ workspace: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkspace>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -347,43 +311,32 @@ export function useGetWorkspace<TData = Awaited<ReturnType<typeof getWorkspace>>
  * @summary Delete a workspace
  */
 export const deleteWorkspace = (
-    workspace: number, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
+    workspace: number,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.delete(
-      `/workspaces/${workspace}`,options
-    );
-  }
-
-export const getDeleteWorkspaceUrl = (workspace: number,) => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/workspaces/${workspace}`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<void>(
+      {url: `/workspaces/${workspace}`, method: 'DELETE', signal
+    },
+      options);
+    }
 
 
 
 
 export const getDeleteWorkspaceMutationKey = () => ['deleteWorkspace'] as const;
 
-export const getDeleteWorkspaceMutationOptions = <TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWorkspace>>, TError,DeleteWorkspaceMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const getDeleteWorkspaceMutationOptions = <TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWorkspace>>, TError,DeleteWorkspaceMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteWorkspace>>, TError,DeleteWorkspaceMutationVariables, TContext> => {
 
 const mutationKey = getDeleteWorkspaceMutationKey();
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -391,7 +344,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteWorkspace>>, DeleteWorkspaceMutationVariables> = (props) => {
           const {workspace} = props ?? {};
 
-          return  deleteWorkspace(workspace,axiosOptions)
+          return  deleteWorkspace(workspace,requestOptions)
         }
 
 
@@ -403,15 +356,15 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type DeleteWorkspaceMutationResult = NonNullable<Awaited<ReturnType<typeof deleteWorkspace>>>
 
-    export type DeleteWorkspaceMutationError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>
+    export type DeleteWorkspaceMutationError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse
     export type DeleteWorkspaceMutationVariables = {workspace: number}
 
     /**
  * Only the owner can delete the workspace.
  * @summary Delete a workspace
  */
-export const useDeleteWorkspace = <TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWorkspace>>, TError,DeleteWorkspaceMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const useDeleteWorkspace = <TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWorkspace>>, TError,DeleteWorkspaceMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteWorkspace>>,
         TError,
@@ -426,44 +379,34 @@ export const useDeleteWorkspace = <TError = AxiosError<UnauthenticatedResponse |
  */
 export const updateWorkspace = (
     workspace: number,
-    workspacePatch: WorkspacePatch, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<WorkspaceResource>> => {
+    workspacePatch: WorkspacePatch,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
 
 
-    return axios.default.patch(
-      `/workspaces/${workspace}`,
-      workspacePatch,options
-    );
-  }
-
-export const getUpdateWorkspaceUrl = (workspace: number,) => {
-
-  return axios.default.create({
-    baseURL: '',
-    params: null,
-  }).getUri({
-    url: `/workspaces/${workspace}`,
-    baseURL: '',
-
-
-  });
-}
+      return customInstance<WorkspaceResource>(
+      {url: `/workspaces/${workspace}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: workspacePatch, signal
+    },
+      options);
+    }
 
 
 
 
 export const getUpdateWorkspaceMutationKey = () => ['updateWorkspace'] as const;
 
-export const getUpdateWorkspaceMutationOptions = <TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWorkspace>>, TError,UpdateWorkspaceMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const getUpdateWorkspaceMutationOptions = <TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWorkspace>>, TError,UpdateWorkspaceMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateWorkspace>>, TError,UpdateWorkspaceMutationVariables, TContext> => {
 
 const mutationKey = getUpdateWorkspaceMutationKey();
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
+const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
+      : {mutation: { mutationKey, }, request: undefined};
 
 
 
@@ -471,7 +414,7 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateWorkspace>>, UpdateWorkspaceMutationVariables> = (props) => {
           const {workspace,data} = props ?? {};
 
-          return  updateWorkspace(workspace,data,axiosOptions)
+          return  updateWorkspace(workspace,data,requestOptions)
         }
 
 
@@ -483,15 +426,15 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
 
     export type UpdateWorkspaceMutationResult = NonNullable<Awaited<ReturnType<typeof updateWorkspace>>>
     export type UpdateWorkspaceMutationBody = WorkspacePatch
-    export type UpdateWorkspaceMutationError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse>
+    export type UpdateWorkspaceMutationError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse
     export type UpdateWorkspaceMutationVariables = {workspace: number;data: WorkspacePatch}
 
     /**
  * Only the owner can update the workspace.
  * @summary Update a workspace
  */
-export const useUpdateWorkspace = <TError = AxiosError<UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWorkspace>>, TError,UpdateWorkspaceMutationVariables, TContext>, axios?: AxiosRequestConfig}
+export const useUpdateWorkspace = <TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse | ValidationFailedResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWorkspace>>, TError,UpdateWorkspaceMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateWorkspace>>,
         TError,
