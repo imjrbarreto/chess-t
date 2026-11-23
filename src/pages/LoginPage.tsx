@@ -9,6 +9,7 @@ import { Alert } from '../components/ui/Alert';
 import { SessionStatus } from '../auth/SessionStatus';
 import { useAuth } from '../auth/useAuth';
 
+
 export function LoginPage() {
     const { user, isCheckingSession, sessionCheckFailed, startSession } = useAuth();
     const { state } = useLocation();
@@ -42,7 +43,10 @@ export function LoginPage() {
 
     const errorStatus = isAxiosError(login.error) ? login.error.response?.status : undefined;
 
-    return (
+	console.log('Error status:', errorStatus);
+	console.log('Axios error:', isAxiosError(login.error));
+    
+	return (
         <Card>
             <h2 className="text-xl font-semibold">
                 Iniciar sesión
