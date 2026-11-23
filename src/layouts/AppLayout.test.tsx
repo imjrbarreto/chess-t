@@ -48,7 +48,7 @@ test('renders the dashboard inside the authenticated layout with an active navig
         current: 'page',
     })).toHaveAttribute('href', '/dashboard');
 
-    expect(within(screen.getByRole('main')).getByRole('heading', {
+    expect(await within(screen.getByRole('main')).findByRole('heading', {
         name: 'Dashboard',
         level: 1,
     })).toBeInTheDocument();

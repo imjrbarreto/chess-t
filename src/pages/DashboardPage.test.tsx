@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw/http';
 import { Link, useLocation } from 'react-router';
@@ -60,7 +60,9 @@ test('revokes the Bearer token, cancels private requests and protects the dashbo
     const publicKey = getHealthCheckQueryKey();
     const abort = vi.fn();
 
-    queryClient.setQueryData(privateKey, { data: [{ id: 1 }] });
+    queryClient.setQueryData(privateKey, {
+        data: [{ id: 1, title: 'Road to GM', status: 'active', role: 'owner' }],
+    });
     queryClient.setQueryData(publicKey, { status: 'ok' });
     const pendingQuery = queryClient.fetchQuery({
         queryKey: pendingKey,
@@ -145,4 +147,116 @@ test('cleans up the session when logout reports an already invalid token', async
 
     expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+});
+
+test('displays statistics for all data and lists up to five accessible workspaces', async () => {
+    server.use(
+        http.get(`${apiUrl}/workspaces`, () => {
+            return HttpResponse.json({
+                data: [
+                    { id: 1, title: 'Road to GM', status: 'active', role: 'owner' },
+                    { id: 2, title: 'Advanced Group', status: 'active', role: 'coach' },
+                    { id: 3, title: 'Beginners', status: 'paused', role: 'owner' },
+                    { id: 4, title: 'Openings', status: 'archived', role: 'student' },
+                    { id: 5, title: 'Endgames', status: 'paused', role: 'viewer' },
+                    { id: 6, title: 'Tactics', status: 'active', role: 'coach' },
+                ],
+            });
+        }),
+
+        http.get(`${apiUrl}/training-sessions`, () => {
+            return HttpResponse.json({
+                data: [
+                    { id: 1, user_id: 1, title: 'Calculation', category: 'tactics' },
+                ],
+            });
+        }),
+    );
+
+    renderDashboard();
+
+    expect(await screen.findByText('Bienvenido, Test User'))
+        .toBeInTheDocument();
+
+    expect(screen.getByText('Workspaces').parentElement)
+        .toHaveTextContent('6');
+
+    expect(screen.getByText('Workspaces activos').parentElement)
+        .toHaveTextContent('3');
+
+    expect(screen.getByText('Sesiones propias').parentElement)
+        .toHaveTextContent('1');
+
+    const section = screen.getByRole('region', { name: 'Workspaces accesibles' });
+    const rows = within(section).getAllByRole('listitem');
+    expect(rows).toHaveLength(5);
+    expect(rows[0]).toHaveTextContent(/Road to GM.*Activo.*Propietario/);
+    expect(rows[1]).toHaveTextContent(/Advanced Group.*Activo.*Entrenador/);
+    expect(rows[2]).toHaveTextContent(/Beginners.*Pausado.*Propietario/);
+    expect(rows[3]).toHaveTextContent(/Openings.*Archivado.*Estudiante/);
+    expect(rows[4]).toHaveTextContent(/Endgames.*Pausado.*Observador/);
+    expect(within(section).queryByText('Tactics')).not.toBeInTheDocument();
+});
+
+test('displays zero statistics when no data exists', async () => {
+    renderDashboard();
+
+    await screen.findByText('Bienvenido, Test User');
+
+    expect(screen.getByText('Workspaces').parentElement)
+        .toHaveTextContent('0');
+
+    expect(screen.getByText('Workspaces activos').parentElement)
+        .toHaveTextContent('0');
+
+    expect(screen.getByText('Sesiones propias').parentElement)
+        .toHaveTextContent('0');
+
+    const section = screen.getByRole('region', { name: 'Workspaces accesibles' });
+    expect(within(section).getByText('Todavía no tienes acceso a ningún workspace.'))
+        .toBeInTheDocument();
+    expect(within(section).queryByRole('list')).not.toBeInTheDocument();
+});
+
+test('displays an error when dashboard data cannot be loaded', async () => {
+    server.use(
+        http.get(`${apiUrl}/workspaces`, () => {
+            return new HttpResponse(null, { status: 500 });
+        }),
+    );
+
+    renderDashboard();
+
+    expect(await screen.findByRole('alert'))
+        .toHaveTextContent('No se pudo cargar el dashboard.');
+});
+
+test('displays a loading state while fetching dashboard data', async () => {
+    let finishRequest!: () => void;
+
+    const pendingRequest = new Promise<void>((resolve) => {
+        finishRequest = resolve;
+    });
+
+    server.use(
+        http.get(`${apiUrl}/workspaces`, async () => {
+            await pendingRequest;
+
+            return HttpResponse.json({ data: [] });
+        }),
+    );
+
+    renderDashboard();
+
+    try {
+        expect(
+            await screen.findByText('Cargando dashboard...')
+        ).toBeInTheDocument();
+    } finally {
+        finishRequest();
+    }
+
+    expect(
+        await screen.findByText('Bienvenido, Test User')
+    ).toBeInTheDocument();
 });
