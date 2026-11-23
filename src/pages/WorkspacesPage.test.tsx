@@ -230,3 +230,35 @@ test('displays an error when workspace creation fails', async () => {
         .toHaveValue('Road to GM');
 });
 
+test('navigates to the selected workspace details', async () => {
+    const user = userEvent.setup();
+
+    const workspace = {
+        id: 1,
+        title: 'Road to GM',
+        status: 'active',
+        role: 'owner',
+    };
+
+    server.use(
+        http.get(`${apiUrl}/workspaces`, () =>
+            HttpResponse.json({ data: [workspace] }),
+        ),
+
+        http.get(`${apiUrl}/workspaces/1`, () =>
+            HttpResponse.json({ data: workspace }),
+        ),
+    );
+
+    renderWithProviders(<App />, '/workspaces');
+
+    await user.click(
+        await screen.findByRole('link', { name: 'Road to GM' })
+    );
+
+    expect(await screen.findByRole('heading', {
+        name: 'Road to GM',
+        level: 1,
+    })).toBeInTheDocument();
+});
+

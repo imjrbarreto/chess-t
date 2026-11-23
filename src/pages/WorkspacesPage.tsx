@@ -7,6 +7,7 @@ import { Plus } from 'lucide-react';
 import { workspaceRoles, workspaceStatuses } from '../features/workspaces/workspaceLabels';
 import { useState } from 'react';
 import { CreateWorkspaceForm } from '../features/workspaces/CreateWorkspaceForm';
+import { Link } from 'react-router';
 
 export function WorkspacesPage() {
     const workspacesQuery = useListWorkspaces();
@@ -57,7 +58,12 @@ return (
                 {workspaces.map((workspace) => (
                     <Card key={workspace.id}>
                         <h2 className="text-lg font-semibold">
-                            {workspace.title}
+                            <Link
+                                to={`/workspaces/${workspace.id}`}
+                                className="hover:text-primary hover:underline"
+                            >
+                                {workspace.title}
+                            </Link>
                         </h2>
 
                         <div className="mt-3 flex flex-wrap gap-2">
