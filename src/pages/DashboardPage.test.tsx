@@ -146,3 +146,97 @@ test('cleans up the session when logout reports an already invalid token', async
     expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 });
+
+test('displays workspace and training session statistics', async () => {
+    server.use(
+        http.get(`${apiUrl}/workspaces`, () => {
+            return HttpResponse.json({
+                data: [
+                    { id: 1, title: 'Road to GM', status: 'active', role: 'owner' },
+                    { id: 2, title: 'Advanced Group', status: 'active', role: 'coach' },
+                    { id: 3, title: 'Beginners', status: 'paused', role: 'owner' },
+                ],
+            });
+        }),
+
+        http.get(`${apiUrl}/training-sessions`, () => {
+            return HttpResponse.json({
+                data: [
+                    { id: 1, user_id: 1, title: 'Calculation', category: 'tactics' },
+                ],
+            });
+        }),
+    );
+
+    renderDashboard();
+
+    expect(await screen.findByText('Bienvenido, Test User'))
+        .toBeInTheDocument();
+
+    expect(screen.getByText('Workspaces').parentElement)
+        .toHaveTextContent('3');
+
+    expect(screen.getByText('Workspaces activos').parentElement)
+        .toHaveTextContent('2');
+
+    expect(screen.getByText('Sesiones propias').parentElement)
+        .toHaveTextContent('1');
+});
+
+test('displays zero statistics when no data exists', async () => {
+    renderDashboard();
+
+    await screen.findByText('Bienvenido, Test User');
+
+    expect(screen.getByText('Workspaces').parentElement)
+        .toHaveTextContent('0');
+
+    expect(screen.getByText('Workspaces activos').parentElement)
+        .toHaveTextContent('0');
+
+    expect(screen.getByText('Sesiones propias').parentElement)
+        .toHaveTextContent('0');
+});
+
+test('displays an error when dashboard data cannot be loaded', async () => {
+    server.use(
+        http.get(`${apiUrl}/workspaces`, () => {
+            return new HttpResponse(null, { status: 500 });
+        }),
+    );
+
+    renderDashboard();
+
+    expect(await screen.findByRole('alert'))
+        .toHaveTextContent('No se pudo cargar el dashboard.');
+});
+
+test('displays a loading state while fetching dashboard data', async () => {
+    let finishRequest!: () => void;
+
+    const pendingRequest = new Promise<void>((resolve) => {
+        finishRequest = resolve;
+    });
+
+    server.use(
+        http.get(`${apiUrl}/workspaces`, async () => {
+            await pendingRequest;
+
+            return HttpResponse.json({ data: [] });
+        }),
+    );
+
+    renderDashboard();
+
+    try {
+        expect(
+            await screen.findByText('Cargando dashboard...')
+        ).toBeInTheDocument();
+    } finally {
+        finishRequest();
+    }
+
+    expect(
+        await screen.findByText('Bienvenido, Test User')
+    ).toBeInTheDocument();
+});
