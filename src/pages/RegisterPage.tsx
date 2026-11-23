@@ -2,8 +2,41 @@ import { Link } from 'react-router';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
+import type { SubmitEvent } from 'react';
+import { useNavigate } from 'react-router';
+import { useRegister } from '../api/generated/authentication/authentication';
+import { useAuth } from '../auth/useAuth';
+import { Alert } from '../components/ui/Alert';
 
 export function RegisterPage() {
+    const register = useRegister();
+    const { startSession } = useAuth();
+    const navigate = useNavigate();
+
+    function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        const formData = new FormData(event.currentTarget);
+
+        register.mutate(
+            {
+                data: {
+                    name: String(formData.get('name')),
+                    email: String(formData.get('email')),
+                    password: String(formData.get('password')),
+                    password_confirmation: String(
+                        formData.get('password_confirmation')
+                    ),
+                },
+            },
+            {
+                onSuccess: (response) => {
+                    startSession(response.token.access_token);
+                    navigate('/dashboard', { replace: true });
+                },
+            },
+        );
+    }
     return (
         <Card>
             <h2 className="text-xl font-semibold">
@@ -14,7 +47,8 @@ export function RegisterPage() {
                 Comienza a gestionar tus entrenamientos.
             </p>
 
-            <form className="mt-6 flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+
                 <Input
                     id="name"
                     name="name"
@@ -51,8 +85,18 @@ export function RegisterPage() {
                     required
                 />
 
-                <Button type="submit" className="w-full">
-                    Crear cuenta
+
+                {register.isError && (
+                    <Alert variant="destructive">
+                        No se ha podido crear la cuenta.
+                    </Alert>
+                )}
+                <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={register.isPending}
+                >
+                    {register.isPending ? 'Creando cuenta...' : 'Crear cuenta'}
                 </Button>
             </form>
 
