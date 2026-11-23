@@ -1,5 +1,6 @@
 import { useHealthCheck } from './api/generated/health/health';
 import { Button } from './components/ui/Button';
+import { Card } from './components/ui/Card';
 import { Input } from './components/ui/Input';
 
 function App() {
@@ -20,6 +21,19 @@ function App() {
             {isSuccess && <p>API conectada correctamente ✅</p>}
         
 
+            <Card className="mx-auto max-w-sm">
+                <h2 className="mb-4 text-xl font-semibold">
+                    Iniciar sesión
+                </h2>
+
+                <div className="flex flex-col gap-4">
+                    <Input id="email" label="Correo electrónico" type="email" />
+
+                    <Input id="password" label="Contraseña" type="password" />
+
+                    <Button>Iniciar sesión</Button>
+                </div>
+            </Card>
             <div className="mx-auto flex max-w-sm flex-col gap-4 p-8">
                 <Input
                     id="email"
