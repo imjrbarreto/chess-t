@@ -12,10 +12,12 @@
 
     --color-success: #15803D;
     --color-destructive: #DC2626;
+
+    --font-sans: "Inter Variable", sans-serif;
 }
 
 @layer base {
     body {
-        @apply bg-background text-foreground antialiased;
+        @apply bg-background text-foreground font-sans antialiased;
     }
 }
