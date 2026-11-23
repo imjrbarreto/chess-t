@@ -15,7 +15,7 @@ export function renderWithProviders(
         },
     });
 
-    return render(
+    const view = render(
         <QueryClientProvider client={queryClient}>
             <MemoryRouter initialEntries={[initialPath]}>
                 <AuthProvider>
@@ -24,4 +24,6 @@ export function renderWithProviders(
             </MemoryRouter>
         </QueryClientProvider>
     );
+
+    return { ...view, queryClient };
 }

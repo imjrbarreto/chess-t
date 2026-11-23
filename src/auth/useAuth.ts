@@ -7,6 +7,9 @@ interface AuthContextValue {
     sessionCheckFailed: boolean;
     retrySessionCheck: () => void;
     startSession: (token: string) => void;
+    logout: () => void;
+    isLoggingOut: boolean;
+    logoutFailed: boolean;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
