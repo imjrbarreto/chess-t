@@ -1,4 +1,5 @@
 import { useHealthCheck } from './api/generated/health/health';
+import { Button } from './components/ui/Button';
 
 function App() {
     const { isPending, isError, isSuccess } = useHealthCheck({
@@ -17,9 +18,15 @@ function App() {
             {isError && <p>Error de conexión.</p>}
             {isSuccess && <p>API conectada correctamente ✅</p>}
         
-          <button className="rounded-lg bg-primary px-4 py-2 text-white hover:bg-primary-hover">
-              Crear workspace
-          </button>
+            <div className="flex gap-4 p-8">
+                <Button>Crear workspace</Button>
+
+                <Button variant="secondary">Cancelar</Button>
+
+                <Button variant="destructive">Eliminar</Button>
+
+                <Button disabled>Guardando...</Button>
+            </div>
         
         </div>
     );
