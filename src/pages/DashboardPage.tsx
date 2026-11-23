@@ -5,20 +5,10 @@ import { Alert } from '../components/ui/Alert';
 import { useAuth } from '../auth/useAuth';
 import { useListWorkspaces } from '../api/generated/workspaces/workspaces';
 import { useListTrainingSessions } from '../api/generated/training-sessions/training-sessions';
-import type { WorkspaceRole, WorkspaceStatus } from '../api/generated/models';
-
-const workspaceStatuses = {
-    active: { label: 'Activo', variant: 'success' },
-    paused: { label: 'Pausado', variant: 'warning' },
-    archived: { label: 'Archivado', variant: 'default' },
-} as const satisfies Record<WorkspaceStatus, { label: string; variant: string }>;
-
-const workspaceRoles: Record<WorkspaceRole, string> = {
-    owner: 'Propietario',
-    coach: 'Entrenador',
-    student: 'Estudiante',
-    viewer: 'Observador',
-};
+import {
+    workspaceStatuses,
+    workspaceRoles,
+} from '../features/workspaces/workspaceLabels';
 
 export function DashboardPage() {
     const { user } = useAuth();
@@ -57,6 +47,7 @@ export function DashboardPage() {
                 <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
                     Dashboard
                 </h1>
+
                 <p className="mt-2 text-muted">
                     Bienvenido, {user?.name}
                 </p>
@@ -71,6 +62,7 @@ export function DashboardPage() {
                             </span>
                             {label}
                         </dt>
+
                         <dd className="text-3xl leading-none font-semibold tabular-nums">
                             {value}
                         </dd>
@@ -85,18 +77,31 @@ export function DashboardPage() {
                     </h2>
 
                     {workspaces.length === 0 ? (
-                        <p className="mt-4 text-sm text-muted">Todavía no tienes acceso a ningún workspace.</p>
+                        <p className="mt-4 text-sm text-muted">
+                            Todavía no tienes acceso a ningún workspace.
+                        </p>
                     ) : (
                         <ul role="list" className="mt-4 divide-y divide-border border-t border-border">
                             {workspaces.slice(0, 5).map((workspace) => {
                                 const status = workspaceStatuses[workspace.status];
 
                                 return (
-                                    <li key={workspace.id} className="grid gap-2 py-3 last:pb-0 @min-[32rem]:grid-cols-[minmax(0,1fr)_15rem] @min-[32rem]:items-center @min-[32rem]:gap-4">
-                                        <span className="wrap-anywhere text-sm font-medium">{workspace.title}</span>
+                                    <li
+                                        key={workspace.id}
+                                        className="grid gap-2 py-3 last:pb-0 @min-[32rem]:grid-cols-[minmax(0,1fr)_15rem] @min-[32rem]:items-center @min-[32rem]:gap-4"
+                                    >
+                                        <span className="wrap-anywhere text-sm font-medium">
+                                            {workspace.title}
+                                        </span>
+
                                         <div className="flex flex-wrap gap-2 @min-[32rem]:grid @min-[32rem]:grid-cols-2 @min-[32rem]:justify-items-start">
-                                            <Badge variant={status.variant}>{status.label}</Badge>
-                                            <Badge>{workspaceRoles[workspace.role]}</Badge>
+                                            <Badge variant={status.variant}>
+                                                {status.label}
+                                            </Badge>
+
+                                            <Badge>
+                                                {workspaceRoles[workspace.role]}
+                                            </Badge>
                                         </div>
                                     </li>
                                 );
