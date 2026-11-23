@@ -2,8 +2,25 @@ import { Link } from 'react-router';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
+import type { SubmitEvent } from 'react';
+import { useLogin } from '../api/generated/authentication/authentication';
+import { Alert } from '../components/ui/Alert';
 
 export function LoginPage() {
+    const login = useLogin();
+
+    function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+
+    login.mutate({
+        data: {
+            email: String(formData.get('email')),
+            password: String(formData.get('password')),
+        },
+    });
+}
     return (
         <Card>
             <h2 className="text-xl font-semibold">
@@ -14,7 +31,7 @@ export function LoginPage() {
                 Accede a tu cuenta de EloMetrics.
             </p>
 
-            <form className="mt-6 flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
                 <Input
                     id="email"
                     name="email"
