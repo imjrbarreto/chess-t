@@ -1,4 +1,5 @@
 import { useHealthCheck } from './api/generated/health/health';
+import { Badge } from './components/ui/Badge';
 import { Button } from './components/ui/Button';
 import { Card } from './components/ui/Card';
 import { Input } from './components/ui/Input';
@@ -20,6 +21,14 @@ function App() {
             {isError && <p>Error de conexión.</p>}
             {isSuccess && <p>API conectada correctamente ✅</p>}
         
+
+            <div className="flex flex-wrap gap-3 p-8">
+                <Badge variant="primary">Owner</Badge>
+                <Badge variant="default">Viewer</Badge>
+                <Badge variant="success">Active</Badge>
+                <Badge variant="warning">Paused</Badge>
+                <Badge variant="destructive">Cancelled</Badge>
+            </div>
 
             <Card className="mx-auto max-w-sm">
                 <h2 className="mb-4 text-xl font-semibold">
