@@ -7,6 +7,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { WorkspacesPage } from './pages/WorkspacesPage';
 import { WorkspaceDetailPage } from './pages/WorkspaceDetailPage';
+import { WorkspaceTrainingSessionDetailPage } from './pages/WorkspaceTrainingSessionDetailPage';
 import { TrainingSessionsPage } from './pages/TrainingSessionsPage';
 import { TrainingSessionDetailPage } from './pages/TrainingSessionDetailPage';
 
@@ -25,6 +26,7 @@ function App() {
                     <Route path="/dashboard" element={<DashboardPage />} />
                     <Route path="/workspaces" element={<WorkspacesPage />} />
                     <Route path="/workspaces/:id" element={<WorkspaceDetailPage />} />
+                    <Route path="/workspaces/:workspaceId/training-sessions/:sessionId" element={<WorkspaceTrainingSessionDetailPage />} />
                     <Route path="/training-sessions" element={<TrainingSessionsPage />} />
                     <Route path="/training-sessions/:id" element={<TrainingSessionDetailPage />} />
                 </Route>

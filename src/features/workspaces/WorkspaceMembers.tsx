@@ -15,6 +15,7 @@ import {
     getGetWorkspaceQueryKey,
     getListWorkspacesQueryKey,
 } from '../../api/generated/workspaces/workspaces';
+import { getListWorkspaceTrainingSessionsQueryKey } from '../../api/generated/workspace-training-sessions/workspace-training-sessions';
 import { useAuth } from '../../auth/useAuth';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
@@ -46,6 +47,7 @@ export function WorkspaceMembers({ workspace, active }: WorkspaceMembersProps) {
     const leaving = target !== null && target.id === user?.id;
     const membersKey = getListWorkspaceMembersQueryKey(workspace.id);
     const detailKey = getGetWorkspaceQueryKey(workspace.id);
+    const linkedSessionsKey = getListWorkspaceTrainingSessionsQueryKey(workspace.id);
     const membersQuery = useListWorkspaceMembers(workspace.id, {
         query: { enabled: active, retry: false },
     });
@@ -66,9 +68,11 @@ export function WorkspaceMembers({ workspace, active }: WorkspaceMembersProps) {
                     queryClient.invalidateQueries({ queryKey: getListWorkspacesQueryKey() }),
                     queryClient.invalidateQueries({ queryKey: detailKey, refetchType: 'none' }),
                     queryClient.invalidateQueries({ queryKey: membersKey, refetchType: 'none' }),
+                    queryClient.invalidateQueries({ queryKey: linkedSessionsKey, refetchType: 'none' }),
                 ]);
                 queryClient.removeQueries({ queryKey: detailKey, exact: true, type: 'inactive' });
                 queryClient.removeQueries({ queryKey: membersKey, exact: true, type: 'inactive' });
+                queryClient.removeQueries({ queryKey: linkedSessionsKey, exact: true, type: 'inactive' });
             },
         },
     });
@@ -81,6 +85,7 @@ export function WorkspaceMembers({ workspace, active }: WorkspaceMembersProps) {
 
             queryClient.removeQueries({ queryKey: getGetWorkspaceQueryKey(workspaceId), exact: true });
             queryClient.removeQueries({ queryKey: getListWorkspaceMembersQueryKey(workspaceId), exact: true });
+            queryClient.removeQueries({ queryKey: getListWorkspaceTrainingSessionsQueryKey(workspaceId), exact: true });
         };
     }, [queryClient, workspace.id]);
 

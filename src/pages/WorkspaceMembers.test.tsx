@@ -5,6 +5,7 @@ import { afterEach, expect, test } from 'vitest';
 import App from '../App';
 import type { Member, WorkspaceRole } from '../api/generated/models';
 import { getListWorkspaceMembersQueryKey } from '../api/generated/workspace-members/workspace-members';
+import { getListWorkspaceTrainingSessionsQueryKey } from '../api/generated/workspace-training-sessions/workspace-training-sessions';
 import { getGetWorkspaceQueryKey, getListWorkspacesQueryKey } from '../api/generated/workspaces/workspaces';
 import { setAccessToken } from '../auth/session';
 import { server } from '../test/mocks/server';
@@ -98,6 +99,10 @@ test('lets a non-owner leave using their own user ID and refreshes the workspace
     queryClient.setQueryData(getListWorkspacesQueryKey(), {
         data: [{ id: 1, title: 'Club', status: 'active', role: 'student' }],
     });
+    const linkedSessionsKey = getListWorkspaceTrainingSessionsQueryKey(1);
+    queryClient.setQueryData(linkedSessionsKey, {
+        data: [{ id: 7, user_id: 1, title: 'Finales de torre', category: 'endgame' }],
+    });
     server.use(
         http.get(`${api}/workspaces`, () => HttpResponse.json({
             data: left ? [] : [{ id: 1, title: 'Club', status: 'active', role: 'student' }],
@@ -120,6 +125,7 @@ test('lets a non-owner leave using their own user ID and refreshes the workspace
     expect(left).toBe(true);
     expect(queryClient.getQueryState(getGetWorkspaceQueryKey(1))).toBeUndefined();
     expect(queryClient.getQueryState(getListWorkspaceMembersQueryKey(1))).toBeUndefined();
+    expect(queryClient.getQueryState(linkedSessionsKey)).toBeUndefined();
 });
 
 test('stays in the workspace when leaving returns 403', async () => {

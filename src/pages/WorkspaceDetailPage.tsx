@@ -1,4 +1,4 @@
-import { Link, useParams, useNavigate } from 'react-router';
+import { Link, useParams, useNavigate, useSearchParams } from 'react-router';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Alert } from '../components/ui/Alert';
@@ -7,6 +7,8 @@ import { Button } from '../components/ui/Button';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useId, useState } from 'react';
 import { WorkspaceMembers } from '../features/workspaces/WorkspaceMembers';
+import { WorkspaceTrainingSessions } from '../features/workspaces/WorkspaceTrainingSessions';
+import { getListWorkspaceTrainingSessionsQueryKey } from '../api/generated/workspace-training-sessions/workspace-training-sessions';
 import { getListWorkspaceMembersQueryKey } from '../api/generated/workspace-members/workspace-members';
 import { EditWorkspaceForm } from '../features/workspaces/EditWorkspaceForm';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
@@ -18,11 +20,13 @@ import {
     getGetWorkspaceQueryKey,
 } from '../api/generated/workspaces/workspaces';
 
-const tabs = ['General', 'Miembros'] as const;
+const tabs = ['General', 'Miembros', 'Sesiones'] as const;
+const tabParams = ['general', 'members', 'sessions'] as const;
 
 export function WorkspaceDetailPage() {
     const tabsId = useId();
-    const [selectedTab, setSelectedTab] = useState<(typeof tabs)[number]>('General');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const selectedTab = tabs[tabParams.findIndex((tab) => tab === searchParams.get('tab'))] ?? 'General';
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const deleteWorkspace = useDeleteWorkspace();
@@ -79,6 +83,10 @@ export function WorkspaceDetailPage() {
                         queryKey: getListWorkspaceMembersQueryKey(workspace.id),
                         exact: true,
                     });
+                    queryClient.removeQueries({
+                        queryKey: getListWorkspaceTrainingSessionsQueryKey(workspace.id),
+                        exact: true,
+                    });
                 },
             },
         );
@@ -98,23 +106,8 @@ export function WorkspaceDetailPage() {
                 role="tablist"
                 aria-label="Workspace"
                 className="flex flex-wrap gap-2 border-b border-border pb-2"
-                onKeyDown={(event) => {
-                    let nextTab;
-                    switch (event.key) {
-                        case 'Home': nextTab = tabs[0]; break;
-                        case 'End': nextTab = tabs[1]; break;
-                        case 'ArrowLeft':
-                        case 'ArrowRight':
-                            nextTab = event.target === document.getElementById(`${tabsId}-tab-${tabs[0]}`)
-                                ? tabs[1] : tabs[0];
-                            break;
-                        default: return;
-                    }
-                    event.preventDefault();
-                    document.getElementById(`${tabsId}-tab-${nextTab}`)?.focus();
-                }}
             >
-                {tabs.map((tab) => (
+                {tabs.map((tab, index) => (
                     <Button
                         key={tab}
                         variant="secondary"
@@ -124,7 +117,26 @@ export function WorkspaceDetailPage() {
                         aria-selected={selectedTab === tab}
                         tabIndex={selectedTab === tab ? 0 : -1}
                         className="aria-selected:border-primary aria-selected:bg-primary/10 aria-selected:text-primary"
-                        onClick={() => setSelectedTab(tab)}
+                        onClick={() => setSearchParams((params) => {
+                            const next = new URLSearchParams(params);
+                            if (index === 0) next.delete('tab');
+                            else next.set('tab', tabParams[index]);
+                            return next;
+                        }, { replace: true })}
+                        onKeyDown={(event) => {
+                            const last = tabs.length - 1;
+                            const destinations: Record<string, number> = {
+                                Home: 0,
+                                End: last,
+                                ArrowLeft: index === 0 ? last : index - 1,
+                                ArrowRight: index === last ? 0 : index + 1,
+                            };
+                            if (!Object.hasOwn(destinations, event.key)) return;
+
+                            event.preventDefault();
+                            const nextTab = tabs[destinations[event.key]];
+                            document.getElementById(`${tabsId}-tab-${nextTab}`)?.focus();
+                        }}
                     >
                         {tab}
                     </Button>
@@ -190,6 +202,16 @@ export function WorkspaceDetailPage() {
                 tabIndex={0}
             >
                 <WorkspaceMembers key={workspace.id} workspace={workspace} active={selectedTab === 'Miembros'} />
+            </div>
+
+            <div
+                role="tabpanel"
+                id={`${tabsId}-panel-Sesiones`}
+                aria-labelledby={`${tabsId}-tab-Sesiones`}
+                hidden={selectedTab !== 'Sesiones'}
+                tabIndex={0}
+            >
+                {selectedTab === 'Sesiones' && <WorkspaceTrainingSessions key={workspace.id} workspace={workspace} />}
             </div>
 
             {showDeleteDialog && (
