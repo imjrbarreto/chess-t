@@ -5,6 +5,8 @@ import { AuthLayout } from './layouts/AuthLayout';
 import { DashboardPage } from './pages/DashboardPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { WorkspacesPage } from './pages/WorkspacesPage';
+import { WorkspaceDetailPage } from './pages/WorkspaceDetailPage';
 
 function App() {
     return (
@@ -19,6 +21,8 @@ function App() {
             <Route element={<ProtectedRoute />}>
                 <Route element={<AppLayout />}>
                     <Route path="/dashboard" element={<DashboardPage />} />
+                    <Route path="/workspaces" element={<WorkspacesPage />} />
+                    <Route path="/workspaces/:id" element={<WorkspaceDetailPage />} />
                 </Route>
             </Route>
         </Routes>
