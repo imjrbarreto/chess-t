@@ -124,6 +124,16 @@ export function AppLayout() {
                         >
                             Workspaces
                         </NavLink>
+                        <NavLink
+                            to="/training-sessions"
+                            className="block rounded-lg px-3 py-2 text-sm font-medium hover:bg-background aria-[current=page]:bg-primary/10 aria-[current=page]:text-primary"
+                            onClick={() => {
+                                setMenuOpen(false);
+                                main.current?.focus();
+                            }}
+                        >
+                            Sesiones de entrenamiento
+                        </NavLink>
                     </nav>
                 </aside>
 

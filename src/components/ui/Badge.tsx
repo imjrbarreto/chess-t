@@ -1,6 +1,13 @@
 import type { HTMLAttributes } from 'react';
 
-type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'destructive';
+type BadgeVariant =
+    | 'default'
+    | 'primary'
+    | 'success'
+    | 'warning'
+    | 'destructive'
+    | 'info'
+    | 'purple';
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
     variant?: BadgeVariant;
@@ -12,6 +19,8 @@ const variants = {
     success: 'bg-success/10 text-success',
     warning: 'bg-amber-100 text-amber-800',
     destructive: 'bg-destructive/10 text-destructive',
+    info: 'bg-blue-100 text-blue-800',
+    purple: 'bg-violet-100 text-violet-800',
 };
 
 export function Badge({
