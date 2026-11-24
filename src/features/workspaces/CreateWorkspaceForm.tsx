@@ -40,12 +40,12 @@ export function CreateWorkspaceForm({
     }
 
     return (
-        <Card>
-            <h2 className="text-xl font-semibold">
+        <Card className="@container">
+            <h2 className="text-xl font-semibold tracking-tight">
                 Nuevo workspace
             </h2>
 
-            <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+            <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
                 <Input
                     id="title"
                     name="title"
@@ -59,7 +59,7 @@ export function CreateWorkspaceForm({
                     </Alert>
                 )}
 
-                <div className="flex justify-end gap-3">
+                <div className="grid gap-3 @min-[22rem]:flex @min-[22rem]:justify-end">
                     <Button
                         variant="secondary"
                         onClick={onCancel}

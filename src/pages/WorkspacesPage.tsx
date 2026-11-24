@@ -26,59 +26,59 @@ export function WorkspacesPage() {
         );
     }
 
-return (
-    <div className="space-y-6">
-        <header className="flex flex-wrap items-center justify-between gap-4">
-            <h1 className="text-3xl font-bold text-primary">
-                Workspaces
-            </h1>
+    return (
+        <div className="@container mx-auto max-w-6xl space-y-6 sm:space-y-8">
+            <header className="grid gap-4 sm:flex sm:items-center sm:justify-between">
+                <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl">
+                    Workspaces
+                </h1>
 
-            <Button
-                className="flex items-center gap-2"
-                onClick={() => setShowCreateForm(true)}
-            >
-                <Plus size={18} aria-hidden="true" />
-                Crear workspace
-            </Button>
-        </header>
-        {showCreateForm && (
-            <CreateWorkspaceForm
-                onCancel={() => setShowCreateForm(false)}
-            />
-        )}
+                <Button
+                    className="flex items-center justify-center gap-2"
+                    onClick={() => setShowCreateForm(true)}
+                >
+                    <Plus size={18} aria-hidden="true" />
+                    Crear workspace
+                </Button>
+            </header>
+            {showCreateForm && (
+                <CreateWorkspaceForm
+                    onCancel={() => setShowCreateForm(false)}
+                />
+            )}
 
-        {workspaces.length === 0 ? (
-            <Card>
-                <p className="text-muted">
-                    No tienes workspaces todavía.
-                </p>
-            </Card>
-        ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {workspaces.map((workspace) => (
-                    <Card key={workspace.id}>
-                        <h2 className="text-lg font-semibold">
-                            <Link
-                                to={`/workspaces/${workspace.id}`}
-                                className="hover:text-primary hover:underline"
-                            >
-                                {workspace.title}
-                            </Link>
-                        </h2>
+            {workspaces.length === 0 ? (
+                <Card>
+                    <p className="text-muted">
+                        No tienes workspaces todavía.
+                    </p>
+                </Card>
+            ) : (
+                <div className="grid gap-4 @min-[34rem]:grid-cols-2 @min-[54rem]:grid-cols-3">
+                    {workspaces.map((workspace) => (
+                        <Card key={workspace.id} className="flex min-w-0 flex-col justify-between gap-4">
+                            <h2 className="text-lg font-semibold wrap-anywhere">
+                                <Link
+                                    to={`/workspaces/${workspace.id}`}
+                                    className="rounded-sm hover:text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                                >
+                                    {workspace.title}
+                                </Link>
+                            </h2>
 
-                        <div className="mt-3 flex flex-wrap gap-2">
-                            <Badge variant={workspaceStatuses[workspace.status].variant}>
-                                {workspaceStatuses[workspace.status].label}
-                            </Badge>
+                            <div className="flex flex-wrap gap-2">
+                                <Badge variant={workspaceStatuses[workspace.status].variant}>
+                                    {workspaceStatuses[workspace.status].label}
+                                </Badge>
 
-                            <Badge>
-                                {workspaceRoles[workspace.role]}
-                            </Badge>
-                        </div>
-                    </Card>
-                ))}
-            </div>
-        )}
-    </div>
-);
+                                <Badge>
+                                    {workspaceRoles[workspace.role]}
+                                </Badge>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
 }

@@ -293,7 +293,8 @@ test('asks for confirmation before deleting a workspace', async () => {
         })
     );
 
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: 'Eliminar workspace' }))
+        .toHaveAccessibleDescription('Esta acción no se puede deshacer.');
 
     expect(screen.getByText('Esta acción no se puede deshacer.'))
         .toBeInTheDocument();
@@ -332,11 +333,8 @@ test('cancels workspace deletion without deleting it', async () => {
 
     renderWithProviders(<App />, '/workspaces/1');
 
-    await user.click(
-        await screen.findByRole('button', {
-            name: 'Eliminar workspace',
-        })
-    );
+    const trigger = await screen.findByRole('button', { name: 'Eliminar workspace' });
+    await user.click(trigger);
 
     await user.click(
         screen.getByRole('button', { name: 'Cancelar' })
@@ -344,6 +342,7 @@ test('cancels workspace deletion without deleting it', async () => {
 
     expect(screen.queryByRole('dialog'))
         .not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
 
     expect(screen.getByRole('heading', { name: 'Road to GM' }))
         .toBeInTheDocument();

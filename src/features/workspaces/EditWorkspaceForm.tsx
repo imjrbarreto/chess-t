@@ -52,41 +52,44 @@ export function EditWorkspaceForm({
         );
     }
     return (
-        <Card>
-            <h2 className="text-xl font-semibold">
+        <Card className="@container">
+            <h2 className="text-xl font-semibold tracking-tight">
                 Editar workspace
             </h2>
 
-            <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-                <Input
-                    id="title"
-                    name="title"
-                    label="Nombre del workspace"
-                    defaultValue={workspace.title}
-                    required
-                    maxLength={255}
-                />
+            <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
+                <div className="grid gap-4 @min-[34rem]:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                    <Input
+                        id="title"
+                        name="title"
+                        label="Nombre del workspace"
+                        defaultValue={workspace.title}
+                        required
+                        maxLength={255}
+                    />
 
-                <Select
-                    id="status"
-                    name="status"
-                    label="Estado"
-                    defaultValue={workspace.status}
-                    required
-                >
-                    {Object.entries(workspaceStatuses).map(([value, status]) => (
-                        <option key={value} value={value}>
-                            {status.label}
-                        </option>
-                    ))}
-                </Select>
+                    <Select
+                        id="status"
+                        name="status"
+                        label="Estado"
+                        defaultValue={workspace.status}
+                        required
+                    >
+                        {Object.entries(workspaceStatuses).map(([value, status]) => (
+                            <option key={value} value={value}>
+                                {status.label}
+                            </option>
+                        ))}
+                    </Select>
+                </div>
+
                 {updateWorkspace.isError && (
                     <Alert variant="destructive">
                         No se pudo actualizar el workspace.
                     </Alert>
                 )}
 
-                <div className="flex justify-end gap-3">
+                <div className="grid gap-3 @min-[22rem]:flex @min-[22rem]:justify-end">
                     <Button
                         variant="secondary"
                         onClick={onCancel}

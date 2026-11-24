@@ -51,7 +51,7 @@ export function WorkspaceDetailPage() {
 
     const workspace = workspaceQuery.data.data;
     const status = workspaceStatuses[workspace.status];
-    
+
     function handleDelete() {
         deleteWorkspace.mutate(
             {
@@ -75,22 +75,34 @@ export function WorkspaceDetailPage() {
     }
 
     return (
-        <div className="space-y-6">
-            <Link to="/workspaces" className="text-sm text-primary hover:underline">
+        <div className="@container mx-auto max-w-6xl space-y-6">
+            <Link to="/workspaces" className="inline-flex min-h-10 items-center rounded-sm text-sm font-medium text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
                 Volver a workspaces
             </Link>
 
             <Card>
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                    <h1 className="text-3xl font-bold text-primary">
-                        {workspace.title}
-                    </h1>
+                <div className="grid gap-5 @min-[48rem]:grid-cols-[minmax(0,1fr)_auto] @min-[48rem]:items-start">
+                    <div className="min-w-0">
+                        <h1 className="text-3xl font-bold tracking-tight wrap-anywhere text-primary sm:text-4xl">
+                            {workspace.title}
+                        </h1>
+
+                        <div className="mt-4 flex flex-wrap gap-2">
+                            <Badge variant={status.variant}>
+                                {status.label}
+                            </Badge>
+
+                            <Badge>
+                                {workspaceRoles[workspace.role]}
+                            </Badge>
+                        </div>
+                    </div>
 
                     {workspace.role === 'owner' && (
-                        <div className="flex flex-wrap gap-2">
+                        <div className="grid gap-2 @min-[29rem]:flex @min-[29rem]:flex-wrap">
                             <Button
                                 variant="secondary"
-                                className="flex items-center gap-2"
+                                className="flex items-center justify-center gap-2"
                                 onClick={() => setShowEditForm(true)}
                             >
                                 <Pencil size={18} aria-hidden="true" />
@@ -99,7 +111,7 @@ export function WorkspaceDetailPage() {
 
                             <Button
                                 variant="destructive"
-                                className="flex items-center gap-2"
+                                className="flex items-center justify-center gap-2"
                                 onClick={() => setShowDeleteDialog(true)}
                             >
                                 <Trash2 size={18} aria-hidden="true" />
@@ -107,16 +119,6 @@ export function WorkspaceDetailPage() {
                             </Button>
                         </div>
                     )}
-                </div>
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                    <Badge variant={status.variant}>
-                        {status.label}
-                    </Badge>
-
-                    <Badge>
-                        {workspaceRoles[workspace.role]}
-                    </Badge>
                 </div>
             </Card>
             {showEditForm && (
