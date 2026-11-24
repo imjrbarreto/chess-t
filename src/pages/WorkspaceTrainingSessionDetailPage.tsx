@@ -5,6 +5,7 @@ import { Alert } from '../components/ui/Alert';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
 import { trainingCategoryLabels, trainingCategoryVariants } from '../features/training-sessions/trainingSessionLabels';
+import { WorkspaceTrainingSessionResponses } from '../features/workspaces/WorkspaceTrainingSessionResponses';
 
 const backLinkClass = 'inline-flex min-h-10 items-center rounded-sm text-sm font-medium text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary';
 
@@ -32,29 +33,32 @@ function WorkspaceTrainingSession({ workspaceId, sessionId }: { workspaceId: num
     const { title, category, description, resource } = sessionQuery.data.data;
 
     return (
-        <Card className="space-y-5">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight wrap-anywhere text-primary sm:text-4xl">{title}</h1>
-                <Badge className="mt-3" variant={trainingCategoryVariants[category]}>
-                    {trainingCategoryLabels[category]}
-                </Badge>
-            </div>
+        <>
+            <Card className="space-y-5">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight wrap-anywhere text-primary sm:text-4xl">{title}</h1>
+                    <Badge className="mt-3" variant={trainingCategoryVariants[category]}>
+                        {trainingCategoryLabels[category]}
+                    </Badge>
+                </div>
 
-            <dl className="grid gap-4 text-sm">
-                <div>
-                    <dt className="font-semibold">Descripción</dt>
-                    <dd className="mt-1 wrap-anywhere whitespace-pre-wrap text-muted">{description || 'Sin descripción'}</dd>
-                </div>
-                <div>
-                    <dt className="font-semibold">Recurso</dt>
-                    <dd className="mt-1 wrap-anywhere text-muted">
-                        {resource && /^https?:\/\//i.test(resource) ? (
-                            <a href={resource} className="text-primary underline underline-offset-2">{resource}</a>
-                        ) : resource || 'Sin recurso'}
-                    </dd>
-                </div>
-            </dl>
-        </Card>
+                <dl className="grid gap-4 text-sm">
+                    <div>
+                        <dt className="font-semibold">Descripción</dt>
+                        <dd className="mt-1 wrap-anywhere whitespace-pre-wrap text-muted">{description || 'Sin descripción'}</dd>
+                    </div>
+                    <div>
+                        <dt className="font-semibold">Recurso</dt>
+                        <dd className="mt-1 wrap-anywhere text-muted">
+                            {resource && /^https?:\/\//i.test(resource) ? (
+                                <a href={resource} className="text-primary underline underline-offset-2">{resource}</a>
+                            ) : resource || 'Sin recurso'}
+                        </dd>
+                    </div>
+                </dl>
+            </Card>
+            <WorkspaceTrainingSessionResponses workspaceId={workspaceId} sessionId={sessionId} />
+        </>
     );
 }
 

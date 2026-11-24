@@ -28,6 +28,7 @@ function renderWorkspace(role: WorkspaceRole, linked: TrainingSession[] = [own, 
         http.get(workspaceUrl, () => HttpResponse.json({
             data: { id: 1, title: 'Club', status: 'active', role },
         })),
+        http.get(`${linkedUrl}/:id/responses`, () => HttpResponse.json({ data: [] })),
         http.get(linkedUrl, () => HttpResponse.json({ data: linked })),
         http.get(ownUrl, () => HttpResponse.json({ data: [own, available] })),
     );
