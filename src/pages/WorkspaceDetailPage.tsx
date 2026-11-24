@@ -5,7 +5,9 @@ import { Alert } from '../components/ui/Alert';
 import { workspaceStatuses, workspaceRoles } from '../features/workspaces/workspaceLabels';
 import { Button } from '../components/ui/Button';
 import { Pencil, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
+import { WorkspaceMembers } from '../features/workspaces/WorkspaceMembers';
+import { getListWorkspaceMembersQueryKey } from '../api/generated/workspace-members/workspace-members';
 import { EditWorkspaceForm } from '../features/workspaces/EditWorkspaceForm';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { useQueryClient } from '@tanstack/react-query';
@@ -16,7 +18,11 @@ import {
     getGetWorkspaceQueryKey,
 } from '../api/generated/workspaces/workspaces';
 
+const tabs = ['General', 'Miembros'] as const;
+
 export function WorkspaceDetailPage() {
+    const tabsId = useId();
+    const [selectedTab, setSelectedTab] = useState<(typeof tabs)[number]>('General');
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const deleteWorkspace = useDeleteWorkspace();
@@ -69,6 +75,10 @@ export function WorkspaceDetailPage() {
                         queryKey: getGetWorkspaceQueryKey(workspace.id),
                         exact: true,
                     });
+                    queryClient.removeQueries({
+                        queryKey: getListWorkspaceMembersQueryKey(workspace.id),
+                        exact: true,
+                    });
                 },
             },
         );
@@ -80,14 +90,58 @@ export function WorkspaceDetailPage() {
                 Volver a workspaces
             </Link>
 
-            <Card>
-                <div className="grid gap-5 @min-[48rem]:grid-cols-[minmax(0,1fr)_auto] @min-[48rem]:items-start">
-                    <div className="min-w-0">
-                        <h1 className="text-3xl font-bold tracking-tight wrap-anywhere text-primary sm:text-4xl">
-                            {workspace.title}
-                        </h1>
+            <h1 className="text-3xl font-bold tracking-tight wrap-anywhere text-primary sm:text-4xl">
+                {workspace.title}
+            </h1>
 
-                        <div className="mt-4 flex flex-wrap gap-2">
+            <div
+                role="tablist"
+                aria-label="Workspace"
+                className="flex flex-wrap gap-2 border-b border-border pb-2"
+                onKeyDown={(event) => {
+                    let nextTab;
+                    switch (event.key) {
+                        case 'Home': nextTab = tabs[0]; break;
+                        case 'End': nextTab = tabs[1]; break;
+                        case 'ArrowLeft':
+                        case 'ArrowRight':
+                            nextTab = event.target === document.getElementById(`${tabsId}-tab-${tabs[0]}`)
+                                ? tabs[1] : tabs[0];
+                            break;
+                        default: return;
+                    }
+                    event.preventDefault();
+                    document.getElementById(`${tabsId}-tab-${nextTab}`)?.focus();
+                }}
+            >
+                {tabs.map((tab) => (
+                    <Button
+                        key={tab}
+                        variant="secondary"
+                        role="tab"
+                        id={`${tabsId}-tab-${tab}`}
+                        aria-controls={`${tabsId}-panel-${tab}`}
+                        aria-selected={selectedTab === tab}
+                        tabIndex={selectedTab === tab ? 0 : -1}
+                        className="aria-selected:border-primary aria-selected:bg-primary/10 aria-selected:text-primary"
+                        onClick={() => setSelectedTab(tab)}
+                    >
+                        {tab}
+                    </Button>
+                ))}
+            </div>
+
+            <div
+                role="tabpanel"
+                id={`${tabsId}-panel-General`}
+                aria-labelledby={`${tabsId}-tab-General`}
+                hidden={selectedTab !== 'General'}
+                tabIndex={0}
+                className="space-y-4"
+            >
+                <Card>
+                    <div className="grid gap-5 @min-[48rem]:grid-cols-[minmax(0,1fr)_auto] @min-[48rem]:items-start">
+                        <div className="flex flex-wrap gap-2">
                             <Badge variant={status.variant}>
                                 {status.label}
                             </Badge>
@@ -96,37 +150,48 @@ export function WorkspaceDetailPage() {
                                 {workspaceRoles[workspace.role]}
                             </Badge>
                         </div>
+
+                        {workspace.role === 'owner' && (
+                            <div className="grid gap-2 @min-[29rem]:flex @min-[29rem]:flex-wrap">
+                                <Button
+                                    variant="secondary"
+                                    className="flex items-center justify-center gap-2"
+                                    onClick={() => setShowEditForm(true)}
+                                >
+                                    <Pencil size={18} aria-hidden="true" />
+                                    Editar workspace
+                                </Button>
+
+                                <Button
+                                    variant="destructive"
+                                    className="flex items-center justify-center gap-2"
+                                    onClick={() => setShowDeleteDialog(true)}
+                                >
+                                    <Trash2 size={18} aria-hidden="true" />
+                                    Eliminar workspace
+                                </Button>
+                            </div>
+                        )}
                     </div>
+                </Card>
+                {showEditForm && (
+                    <EditWorkspaceForm
+                        workspace={workspace}
+                        onCancel={() => setShowEditForm(false)}
+                    />
+                )}
+            </div>
 
-                    {workspace.role === 'owner' && (
-                        <div className="grid gap-2 @min-[29rem]:flex @min-[29rem]:flex-wrap">
-                            <Button
-                                variant="secondary"
-                                className="flex items-center justify-center gap-2"
-                                onClick={() => setShowEditForm(true)}
-                            >
-                                <Pencil size={18} aria-hidden="true" />
-                                Editar workspace
-                            </Button>
+            <div
+                role="tabpanel"
+                id={`${tabsId}-panel-Miembros`}
+                aria-labelledby={`${tabsId}-tab-Miembros`}
+                hidden={selectedTab !== 'Miembros'}
+                tabIndex={0}
+            >
+                <WorkspaceMembers key={workspace.id} workspace={workspace} active={selectedTab === 'Miembros'} />
+            </div>
 
-                            <Button
-                                variant="destructive"
-                                className="flex items-center justify-center gap-2"
-                                onClick={() => setShowDeleteDialog(true)}
-                            >
-                                <Trash2 size={18} aria-hidden="true" />
-                                Eliminar workspace
-                            </Button>
-                        </div>
-                    )}
-                </div>
-            </Card>
-            {showEditForm && (
-                <EditWorkspaceForm
-                    workspace={workspace}
-                    onCancel={() => setShowEditForm(false)}
-                />
-            )}
             {showDeleteDialog && (
                 <ConfirmDialog
                     title="Eliminar workspace"

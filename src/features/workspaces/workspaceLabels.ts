@@ -15,3 +15,10 @@ export const workspaceRoles: Record<WorkspaceRole, string> = {
     student: 'Estudiante',
     viewer: 'Observador',
 };
+
+export const workspaceRoleVariants = {
+    owner: 'primary',
+    coach: 'success',
+    student: 'warning',
+    viewer: 'default',
+} as const satisfies Record<WorkspaceRole, string>;
