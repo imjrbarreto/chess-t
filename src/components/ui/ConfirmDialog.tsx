@@ -8,6 +8,8 @@ interface ConfirmDialogProps {
     description: string;
     onConfirm: () => void;
     onCancel: () => void;
+    confirmLabel?: string;
+    pendingLabel?: string;
     isPending?: boolean;
     error?: string;
 }
@@ -17,6 +19,8 @@ export function ConfirmDialog({
     description,
     onConfirm,
     onCancel,
+    confirmLabel = 'Confirmar eliminación',
+    pendingLabel = 'Eliminando...',
     isPending = false,
     error,
 }: ConfirmDialogProps) {
@@ -113,7 +117,7 @@ export function ConfirmDialog({
                         onClick={onConfirm}
                         disabled={isPending}
                     >
-                        {isPending ? 'Eliminando...' : 'Confirmar eliminación'}
+                        {isPending ? pendingLabel : confirmLabel}
                     </Button>
                 </div>
             </Card>
