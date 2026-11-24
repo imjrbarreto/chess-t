@@ -5,6 +5,7 @@ import { Alert } from '../components/ui/Alert';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
 import { trainingCategoryLabels, trainingCategoryVariants } from '../features/training-sessions/trainingSessionLabels';
+import { WorkspaceTrainingSessionExport } from '../features/workspaces/WorkspaceTrainingSessionExport';
 import { WorkspaceTrainingSessionResponses } from '../features/workspaces/WorkspaceTrainingSessionResponses';
 
 const backLinkClass = 'inline-flex min-h-10 items-center rounded-sm text-sm font-medium text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary';
@@ -35,11 +36,14 @@ function WorkspaceTrainingSession({ workspaceId, sessionId }: { workspaceId: num
     return (
         <>
             <Card className="space-y-5">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight wrap-anywhere text-primary sm:text-4xl">{title}</h1>
-                    <Badge className="mt-3" variant={trainingCategoryVariants[category]}>
-                        {trainingCategoryLabels[category]}
-                    </Badge>
+                <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,auto)] sm:items-start">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight wrap-anywhere text-primary sm:text-4xl">{title}</h1>
+                        <Badge className="mt-3" variant={trainingCategoryVariants[category]}>
+                            {trainingCategoryLabels[category]}
+                        </Badge>
+                    </div>
+                    <WorkspaceTrainingSessionExport key={`${workspaceId}/${sessionId}`} workspaceId={workspaceId} sessionId={sessionId} />
                 </div>
 
                 <dl className="grid gap-4 text-sm">
