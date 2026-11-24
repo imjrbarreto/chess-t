@@ -247,3 +247,204 @@ test('preserves form data when workspace update fails', async () => {
 
     expect(title).toHaveValue('Advanced Training');
 });
+
+test('displays the delete button for the workspace owner', async () => {
+    server.use(
+        http.get(`${apiUrl}/workspaces/1`, () =>
+            HttpResponse.json({
+                data: {
+                    id: 1,
+                    title: 'Road to GM',
+                    status: 'active',
+                    role: 'owner',
+                },
+            }),
+        ),
+    );
+
+    renderWithProviders(<App />, '/workspaces/1');
+
+    expect(await screen.findByRole('button', {
+        name: 'Eliminar workspace',
+    })).toBeInTheDocument();
+});
+
+test('asks for confirmation before deleting a workspace', async () => {
+    server.use(
+        http.get(`${apiUrl}/workspaces/1`, () =>
+            HttpResponse.json({
+                data: {
+                    id: 1,
+                    title: 'Road to GM',
+                    status: 'active',
+                    role: 'owner',
+                },
+            }),
+        ),
+    );
+
+    const user = userEvent.setup();
+
+    renderWithProviders(<App />, '/workspaces/1');
+
+    await user.click(
+        await screen.findByRole('button', {
+            name: 'Eliminar workspace',
+        })
+    );
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+    expect(screen.getByText('Esta acción no se puede deshacer.'))
+        .toBeInTheDocument();
+
+    expect(screen.getByRole('button', {
+        name: 'Confirmar eliminación',
+    })).toBeInTheDocument();
+
+    expect(screen.getByRole('button', {
+        name: 'Cancelar',
+    })).toBeInTheDocument();
+});
+
+test('cancels workspace deletion without deleting it', async () => {
+    let deleted = false;
+
+    server.use(
+        http.get(`${apiUrl}/workspaces/1`, () =>
+            HttpResponse.json({
+                data: {
+                    id: 1,
+                    title: 'Road to GM',
+                    status: 'active',
+                    role: 'owner',
+                },
+            }),
+        ),
+
+        http.delete(`${apiUrl}/workspaces/1`, () => {
+            deleted = true;
+            return new HttpResponse(null, { status: 204 });
+        }),
+    );
+
+    const user = userEvent.setup();
+
+    renderWithProviders(<App />, '/workspaces/1');
+
+    await user.click(
+        await screen.findByRole('button', {
+            name: 'Eliminar workspace',
+        })
+    );
+
+    await user.click(
+        screen.getByRole('button', { name: 'Cancelar' })
+    );
+
+    expect(screen.queryByRole('dialog'))
+        .not.toBeInTheDocument();
+
+    expect(screen.getByRole('heading', { name: 'Road to GM' }))
+        .toBeInTheDocument();
+
+    expect(deleted).toBe(false);
+});
+
+test('deletes the workspace and redirects to the workspace list', async () => {
+    const workspace = {
+        id: 1,
+        title: 'Road to GM',
+        status: 'active',
+        role: 'owner',
+    };
+
+    let deleted = false;
+
+    server.use(
+        http.get(`${apiUrl}/workspaces/1`, () =>
+            HttpResponse.json({ data: workspace }),
+        ),
+
+        http.get(`${apiUrl}/workspaces`, () =>
+            HttpResponse.json({
+                data: deleted ? [] : [workspace],
+            }),
+        ),
+
+        http.delete(`${apiUrl}/workspaces/1`, () => {
+            deleted = true;
+
+            return new HttpResponse(null, { status: 204 });
+        }),
+    );
+
+    const user = userEvent.setup();
+
+    renderWithProviders(<App />, '/workspaces/1');
+
+    await user.click(
+        await screen.findByRole('button', {
+            name: 'Eliminar workspace',
+        })
+    );
+
+    await user.click(
+        screen.getByRole('button', {
+            name: 'Confirmar eliminación',
+        })
+    );
+
+    expect(
+        await screen.findByText('No tienes workspaces todavía.')
+    ).toBeInTheDocument();
+
+    expect(deleted).toBe(true);
+
+    expect(screen.queryByRole('dialog'))
+        .not.toBeInTheDocument();
+});
+
+test('displays an error when workspace deletion fails', async () => {
+    server.use(
+        http.get(`${apiUrl}/workspaces/1`, () =>
+            HttpResponse.json({
+                data: {
+                    id: 1,
+                    title: 'Road to GM',
+                    status: 'active',
+                    role: 'owner',
+                },
+            }),
+        ),
+
+        http.delete(`${apiUrl}/workspaces/1`, () =>
+            new HttpResponse(null, { status: 500 }),
+        ),
+    );
+
+    const user = userEvent.setup();
+
+    renderWithProviders(<App />, '/workspaces/1');
+
+    await user.click(
+        await screen.findByRole('button', {
+            name: 'Eliminar workspace',
+        })
+    );
+
+    await user.click(
+        screen.getByRole('button', {
+            name: 'Confirmar eliminación',
+        })
+    );
+
+    expect(await screen.findByRole('alert'))
+        .toHaveTextContent('No se pudo eliminar el workspace.');
+
+    expect(screen.getByRole('dialog'))
+        .toBeInTheDocument();
+
+    expect(screen.getByRole('heading', { name: 'Road to GM' }))
+        .toBeInTheDocument();
+});

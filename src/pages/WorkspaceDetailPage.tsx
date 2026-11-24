@@ -1,16 +1,27 @@
-import { Link, useParams } from 'react-router';
-import { useGetWorkspace } from '../api/generated/workspaces/workspaces';
+import { Link, useParams, useNavigate } from 'react-router';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Alert } from '../components/ui/Alert';
 import { workspaceStatuses, workspaceRoles } from '../features/workspaces/workspaceLabels';
 import { Button } from '../components/ui/Button';
-import { Pencil } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { EditWorkspaceForm } from '../features/workspaces/EditWorkspaceForm';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+    useGetWorkspace,
+    useDeleteWorkspace,
+    getListWorkspacesQueryKey,
+    getGetWorkspaceQueryKey,
+} from '../api/generated/workspaces/workspaces';
 
 export function WorkspaceDetailPage() {
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const deleteWorkspace = useDeleteWorkspace();
     const [showEditForm, setShowEditForm] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
     const { id } = useParams();
     const workspaceId = Number(id);
@@ -41,6 +52,27 @@ export function WorkspaceDetailPage() {
     const workspace = workspaceQuery.data.data;
     const status = workspaceStatuses[workspace.status];
     
+    function handleDelete() {
+        deleteWorkspace.mutate(
+            {
+                workspace: workspace.id,
+            },
+            {
+                onSuccess: async () => {
+                    await queryClient.invalidateQueries({
+                        queryKey: getListWorkspacesQueryKey(),
+                    });
+
+                    navigate('/workspaces', { replace: true });
+
+                    queryClient.removeQueries({
+                        queryKey: getGetWorkspaceQueryKey(workspace.id),
+                        exact: true,
+                    });
+                },
+            },
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -55,14 +87,25 @@ export function WorkspaceDetailPage() {
                     </h1>
 
                     {workspace.role === 'owner' && (
-                        <Button
-                            variant="secondary"
-                            className="flex items-center gap-2"
-                            onClick={() => setShowEditForm(true)}
-                        >
-                            <Pencil size={18} aria-hidden="true" />
-                            Editar workspace
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                variant="secondary"
+                                className="flex items-center gap-2"
+                                onClick={() => setShowEditForm(true)}
+                            >
+                                <Pencil size={18} aria-hidden="true" />
+                                Editar workspace
+                            </Button>
+
+                            <Button
+                                variant="destructive"
+                                className="flex items-center gap-2"
+                                onClick={() => setShowDeleteDialog(true)}
+                            >
+                                <Trash2 size={18} aria-hidden="true" />
+                                Eliminar workspace
+                            </Button>
+                        </div>
                     )}
                 </div>
 
@@ -80,6 +123,23 @@ export function WorkspaceDetailPage() {
                 <EditWorkspaceForm
                     workspace={workspace}
                     onCancel={() => setShowEditForm(false)}
+                />
+            )}
+            {showDeleteDialog && (
+                <ConfirmDialog
+                    title="Eliminar workspace"
+                    description="Esta acción no se puede deshacer."
+                    onConfirm={handleDelete}
+                    onCancel={() => {
+                        deleteWorkspace.reset();
+                        setShowDeleteDialog(false);
+                    }}
+                    isPending={deleteWorkspace.isPending}
+                    error={
+                        deleteWorkspace.isError
+                            ? 'No se pudo eliminar el workspace.'
+                            : undefined
+                    }
                 />
             )}
         </div>
