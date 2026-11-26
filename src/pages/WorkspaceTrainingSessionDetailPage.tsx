@@ -4,6 +4,7 @@ import { useGetWorkspaceTrainingSession } from '../api/generated/workspace-train
 import { Alert } from '../components/ui/Alert';
 import { Badge } from '../components/ui/Badge';
 import { Card } from '../components/ui/Card';
+import { TrainingGames } from '../features/training-sessions/TrainingGames';
 import { trainingCategoryLabels, trainingCategoryVariants } from '../features/training-sessions/trainingSessionLabels';
 import { WorkspaceTrainingSessionExport } from '../features/workspaces/WorkspaceTrainingSessionExport';
 import { WorkspaceTrainingSessionResponses } from '../features/workspaces/WorkspaceTrainingSessionResponses';
@@ -31,7 +32,7 @@ function WorkspaceTrainingSession({ workspaceId, sessionId }: { workspaceId: num
         );
     }
 
-    const { title, category, description, resource } = sessionQuery.data.data;
+    const { title, category, description, resource, games } = sessionQuery.data.data;
 
     return (
         <>
@@ -61,6 +62,7 @@ function WorkspaceTrainingSession({ workspaceId, sessionId }: { workspaceId: num
                     </div>
                 </dl>
             </Card>
+            <TrainingGames games={games} />
             <WorkspaceTrainingSessionResponses workspaceId={workspaceId} sessionId={sessionId} />
         </>
     );

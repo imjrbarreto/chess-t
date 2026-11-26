@@ -28,6 +28,7 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   NotFoundResponse,
+  TrainingSessionDetailResource,
   TrainingSessionInput,
   TrainingSessionList,
   TrainingSessionPatch,
@@ -216,7 +217,7 @@ export const useCreateTrainingSession = <TError = UnauthenticatedResponse | Vali
       return useMutation(getCreateTrainingSessionMutationOptions(options), queryClient);
     }
     /**
- * Only the creator of the session can view it.
+ * Only the creator of the session can view it. The response includes the games of the session.
  * @summary Get a training session
  */
 export const getTrainingSession = (
@@ -225,7 +226,7 @@ export const getTrainingSession = (
 ) => {
 
 
-      return customInstance<TrainingSessionResource>(
+      return customInstance<TrainingSessionDetailResource>(
       {url: `/training-sessions/${trainingSession}`, method: 'GET', signal
     },
       options);
@@ -264,7 +265,7 @@ export type GetTrainingSessionQueryError = UnauthenticatedResponse | ForbiddenRe
 
 
 /**
- * Only the creator of the session can view it.
+ * Only the creator of the session can view it. The response includes the games of the session.
  * @summary Get a training session
  */
 export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
@@ -278,7 +279,7 @@ export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrain
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * Only the creator of the session can view it.
+ * Only the creator of the session can view it. The response includes the games of the session.
  * @summary Get a training session
  */
 export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
@@ -292,7 +293,7 @@ export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrain
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * Only the creator of the session can view it.
+ * Only the creator of the session can view it. The response includes the games of the session.
  * @summary Get a training session
  */
 export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
@@ -300,7 +301,7 @@ export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrain
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * Only the creator of the session can view it.
+ * Only the creator of the session can view it. The response includes the games of the session.
  * @summary Get a training session
  */
 export function useGetTrainingSession<TData = Awaited<ReturnType<typeof getTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(

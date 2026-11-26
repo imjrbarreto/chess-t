@@ -1,5 +1,6 @@
 export * from './authentication/authentication';
 export * from './health/health';
+export * from './training-games/training-games';
 export * from './training-session-responses/training-session-responses';
 export * from './training-sessions/training-sessions';
 export * from './workspace-members/workspace-members';
