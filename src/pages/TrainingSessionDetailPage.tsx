@@ -10,12 +10,13 @@ import {
     useGetTrainingSession,
     useUpdateTrainingSession,
 } from '../api/generated/training-sessions/training-sessions';
-import type { TrainingSessionList } from '../api/generated/models';
+import type { TrainingSessionDetailResource, TrainingSessionList } from '../api/generated/models';
 import { Alert } from '../components/ui/Alert';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { EditableTrainingGames } from '../features/training-sessions/TrainingGames';
 import { TrainingSessionForm } from '../features/training-sessions/TrainingSessionForm';
 import { trainingCategoryLabels } from '../features/training-sessions/trainingSessionLabels';
 
@@ -36,8 +37,13 @@ function TrainingSessionDetail({ id }: { id: number }) {
         mutation: {
             onSuccess: async (updated) => {
                 await queryClient.cancelQueries({ queryKey: detailKey, exact: true });
-                queryClient.setQueryData(detailKey, updated);
-                await queryClient.invalidateQueries({ queryKey: listKey });
+                queryClient.setQueryData<TrainingSessionDetailResource>(detailKey, (detail) => ({
+                    data: { ...updated.data, games: detail?.data.games ?? [] },
+                }));
+                await Promise.all([
+                    queryClient.invalidateQueries({ queryKey: detailKey, exact: true }),
+                    queryClient.invalidateQueries({ queryKey: listKey }),
+                ]);
             },
         },
     });
@@ -148,6 +154,8 @@ function TrainingSessionDetail({ id }: { id: number }) {
                     error={updateSession.error}
                 />
             )}
+
+            <EditableTrainingGames sessionId={id} games={session.games} />
 
             {showDeleteDialog && (
                 <ConfirmDialog
