@@ -5,10 +5,12 @@ import { isAxiosError } from 'axios';
 import type { TrainingGame, ValidationError } from '../../api/generated/models';
 import { useCreateTrainingGame, useDeleteTrainingGame } from '../../api/generated/training-games/training-games';
 import { getGetTrainingSessionQueryKey } from '../../api/generated/training-sessions/training-sessions';
+import { ChessGameViewer } from '../../components/ChessGameViewer';
 import { Alert } from '../../components/ui/Alert';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { Select } from '../../components/ui/Select';
 
 const maxPgnLength = 50_000;
 
@@ -21,9 +23,29 @@ export function TrainingGames({
     children?: ReactNode;
     renderActions?: (game: TrainingGame, index: number) => ReactNode;
 }) {
+    const selectId = useId();
+    const [selectedId, setSelectedId] = useState<number>();
+    const selectedGame = games.find((game) => game.id === selectedId) ?? games[0];
+
     return (
         <Card className="@container min-w-0 space-y-5">
             <h2 className="text-xl font-semibold tracking-tight">Partidas</h2>
+
+            {selectedGame && (
+                <>
+                    <Select
+                        id={selectId}
+                        label="Seleccionar partida"
+                        value={selectedGame.id}
+                        onChange={(event) => setSelectedId(Number(event.target.value))}
+                    >
+                        {games.map((game, index) => (
+                            <option key={game.id} value={game.id}>Partida {index + 1}</option>
+                        ))}
+                    </Select>
+                    <ChessGameViewer key={selectedGame.id} pgn={selectedGame.pgn} />
+                </>
+            )}
 
             {games.length === 0 ? (
                 <p className="text-sm text-muted">Todavía no hay partidas.</p>
@@ -35,7 +57,10 @@ export function TrainingGames({
                                 <h3 className="text-sm font-semibold">Partida {index + 1}</h3>
                                 {renderActions?.(game, index)}
                             </div>
-                            <pre className="mt-3 wrap-anywhere whitespace-pre-wrap text-sm text-muted">{game.pgn}</pre>
+                            <details className="mt-3 text-sm text-muted">
+                                <summary className="cursor-pointer">Ver PGN original</summary>
+                                <pre className="mt-2 wrap-anywhere whitespace-pre-wrap">{game.pgn}</pre>
+                            </details>
                         </li>
                     ))}
                 </ul>
