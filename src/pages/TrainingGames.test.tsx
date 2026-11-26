@@ -61,6 +61,7 @@ test('adds the original PGN and refreshes the owning and linked details', async 
 
     expect((await screen.findByText(/Comentario/, { selector: 'pre' })).textContent).toBe(pgn);
     await waitFor(() => expect(input).toHaveValue(''));
+    expect(screen.getByRole('button', { name: 'Motor Stockfish' })).toHaveAttribute('aria-pressed', 'false');
     expect(create).toHaveBeenCalledExactlyOnceWith({ pgn });
     expect(queryClient.getQueryState(linkedKey)?.isInvalidated).toBe(true);
     expect(queryClient.getQueryState(unrelatedKey)?.isInvalidated).toBe(false);
@@ -132,5 +133,5 @@ test('shows games in the linked detail without modification controls', async () 
     renderDetail(linkedPath);
     expect((await screen.findByText(/Comentario/, { selector: 'pre' })).textContent).toBe(pgn);
     expect(screen.queryByRole('textbox', { name: 'PGN' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /añadir partida|eliminar partida/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /añadir partida|eliminar partida|motor stockfish/i })).not.toBeInTheDocument();
 });
