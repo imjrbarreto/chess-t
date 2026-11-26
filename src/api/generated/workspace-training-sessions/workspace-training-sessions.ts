@@ -28,8 +28,8 @@ import type {
   ForbiddenResponse,
   LinkTrainingSessionInput,
   NotFoundResponse,
+  TrainingSessionDetailResource,
   TrainingSessionList,
-  TrainingSessionResource,
   UnauthenticatedResponse,
   ValidationFailedResponse
 } from '../models';
@@ -232,6 +232,7 @@ export const useLinkTrainingSession = <TError = UnauthenticatedResponse | Forbid
       return useMutation(getLinkTrainingSessionMutationOptions(options), queryClient);
     }
     /**
+ * Available to any member of the workspace, whoever created the session. The session must be linked to the workspace.
  * @summary Get a training session linked to a workspace
  */
 export const getWorkspaceTrainingSession = (
@@ -241,7 +242,7 @@ export const getWorkspaceTrainingSession = (
 ) => {
 
 
-      return customInstance<TrainingSessionResource>(
+      return customInstance<TrainingSessionDetailResource>(
       {url: `/workspaces/${workspace}/training-sessions/${trainingSession}`, method: 'GET', signal
     },
       options);
@@ -281,7 +282,10 @@ export type GetWorkspaceTrainingSessionQueryResult = NonNullable<Awaited<ReturnT
 export type GetWorkspaceTrainingSessionQueryError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse
 
 
-/** @summary Get a training session linked to a workspace */
+/**
+ * Available to any member of the workspace, whoever created the session. The session must be linked to the workspace.
+ * @summary Get a training session linked to a workspace
+ */
 export function useGetWorkspaceTrainingSession<TData = Awaited<ReturnType<typeof getWorkspaceTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  workspace: number,
     trainingSession: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkspaceTrainingSession>>, TError, TData>> & Pick<
@@ -293,7 +297,10 @@ export function useGetWorkspaceTrainingSession<TData = Awaited<ReturnType<typeof
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/** @summary Get a training session linked to a workspace */
+/**
+ * Available to any member of the workspace, whoever created the session. The session must be linked to the workspace.
+ * @summary Get a training session linked to a workspace
+ */
 export function useGetWorkspaceTrainingSession<TData = Awaited<ReturnType<typeof getWorkspaceTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  workspace: number,
     trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkspaceTrainingSession>>, TError, TData>> & Pick<
@@ -305,13 +312,19 @@ export function useGetWorkspaceTrainingSession<TData = Awaited<ReturnType<typeof
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/** @summary Get a training session linked to a workspace */
+/**
+ * Available to any member of the workspace, whoever created the session. The session must be linked to the workspace.
+ * @summary Get a training session linked to a workspace
+ */
 export function useGetWorkspaceTrainingSession<TData = Awaited<ReturnType<typeof getWorkspaceTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  workspace: number,
     trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkspaceTrainingSession>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/** @summary Get a training session linked to a workspace */
+/**
+ * Available to any member of the workspace, whoever created the session. The session must be linked to the workspace.
+ * @summary Get a training session linked to a workspace
+ */
 export function useGetWorkspaceTrainingSession<TData = Awaited<ReturnType<typeof getWorkspaceTrainingSession>>, TError = UnauthenticatedResponse | ForbiddenResponse | NotFoundResponse>(
  workspace: number,
     trainingSession: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getWorkspaceTrainingSession>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
