@@ -17,6 +17,10 @@
 }
 
 @layer base {
+    html:has([data-chess-game-viewer]) {
+        scrollbar-gutter: stable;
+    }
+
     body {
         @apply bg-background text-foreground font-sans antialiased;
     }

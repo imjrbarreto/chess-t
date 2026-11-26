@@ -17,10 +17,12 @@ const maxPgnLength = 50_000;
 export function TrainingGames({
     games = [],
     children,
+    allowEngine = false,
     renderActions,
 }: {
     games?: TrainingGame[];
     children?: ReactNode;
+    allowEngine?: boolean;
     renderActions?: (game: TrainingGame, index: number) => ReactNode;
 }) {
     const selectId = useId();
@@ -43,7 +45,7 @@ export function TrainingGames({
                             <option key={game.id} value={game.id}>Partida {index + 1}</option>
                         ))}
                     </Select>
-                    <ChessGameViewer key={selectedGame.id} pgn={selectedGame.pgn} />
+                    <ChessGameViewer key={selectedGame.id} pgn={selectedGame.pgn} allowEngine={allowEngine} />
                 </>
             )}
 
@@ -115,7 +117,7 @@ export function EditableTrainingGames({ sessionId, games }: { sessionId: number;
     }
 
     return (
-        <TrainingGames games={games} renderActions={(game, index) => (
+        <TrainingGames games={games} allowEngine renderActions={(game, index) => (
             <Button
                 variant="destructive"
                 aria-label={`Eliminar partida ${index + 1}`}
